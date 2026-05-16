@@ -11,8 +11,11 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected!'))
   .catch(err => console.log('MongoDB Error:', err.message));
 
-const authRoutes = require('./routes/auth.js');
+const authRoutes = require('./routes/auth');
+const resumeRoutes = require('./routes/resume');
+
 app.use('/api/auth', authRoutes);
+app.use('/api/resume', resumeRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'ResumeAI backend running!' });
