@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Dependencies
 node_modules/
 frontend/node_modules/
@@ -18,3 +19,18 @@ npm-debug.log*
 # OS
 .DS_Store
 Thumbs.db
+=======
+# Ignore local environment files
+.env
+.env.local
+.env.development
+.env.production
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.production
+>>>>>>> c9531fb3120c35de9c32bdd7f88908b1ee7ae0d8
