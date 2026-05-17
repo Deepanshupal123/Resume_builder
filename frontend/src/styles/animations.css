@@ -1,0 +1,112 @@
+/* ═══ KEYFRAMES ═══ */
+@keyframes slideL {
+  from { opacity: 0; transform: translateX(-50px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideR {
+  from { opacity: 0; transform: translateX(50px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes floatUpDown {
+  0%,100% { transform: translateY(0px); }
+  50%     { transform: translateY(-12px); }
+}
+@keyframes countUp {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ═══ HERO ANIMATIONS (auto — page load pe) ═══ */
+.hero-left {
+  animation: slideL 0.8s cubic-bezier(0.22, 0.68, 0, 1.15) forwards;
+}
+.hero-right {
+  animation: slideR 0.8s cubic-bezier(0.22, 0.68, 0, 1.15) 0.2s both;
+}
+.hero-badge {
+  animation: scaleIn 0.5s ease 0.1s both;
+}
+
+/* ═══ FLOATING CARD ═══ */
+.float-card {
+  animation: floatUpDown 3.5s ease-in-out infinite !important;
+}
+
+/* ═══ SCROLL ANIMATIONS ═══ */
+/* Default: hidden */
+.sa {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+/* When visible class added by JS */
+.sa.visible {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Stagger delays */
+.d1 { transition-delay: 0.05s; }
+.d2 { transition-delay: 0.15s; }
+.d3 { transition-delay: 0.25s; }
+.d4 { transition-delay: 0.35s; }
+.d5 { transition-delay: 0.45s; }
+.d6 { transition-delay: 0.55s; }
+
+/* ═══ HOVER LIFT ═══ */
+.lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+  cursor: pointer;
+}
+.lift:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* ═══ BUTTON ANIMATIONS ═══ */
+.btn-anim {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s !important;
+}
+.btn-anim:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 28px rgba(37, 99, 235, 0.45) !important;
+}
+.btn-anim:active {
+  transform: translateY(0) !important;
+}
+
+/* ═══ NAV LINK UNDERLINE ═══ */
+.nav-link {
+  position: relative;
+  text-decoration: none;
+}
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #2563eb, #7c3aed);
+  transition: width 0.25s ease;
+}
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* ═══ TEMPLATE BUTTON ═══ */
+.tmpl-btn {
+  transition: all 0.2s ease !important;
+}
+.tmpl-btn:hover {
+  background: #e0e7ff !important;
+  color: #2563eb !important;
+}
