@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Signup() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -19,9 +20,8 @@ export default function Signup() {
       const data = await res.json();
       if (!res.ok) return alert(data.message);
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      window.location.href = '/resume';
+      alert('Signup successful! Please login to continue.');
+      navigate('/');
     } catch (err) {
       alert('Server se connect nahi ho pa raha');
     } finally {
