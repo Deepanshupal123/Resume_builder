@@ -2,11 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Groq = require('groq-sdk');
 
-<<<<<<< HEAD
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-=======
 const groq = new Groq({ apiKey:process.env.GROQ_API_KEY });
->>>>>>> c9531fb3120c35de9c32bdd7f88908b1ee7ae0d8
 
 router.post('/generate', async (req, res) => {
   try {
