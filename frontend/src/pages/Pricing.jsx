@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const API_BASE = 'https://resume-builder-7ngc.onrender.com';
 
 export default function Pricing() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [subscriptionEnd, setSubscriptionEnd] = useState(null);
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const [user, setUser] = useState(() => {
+  const stored = localStorage.getItem('user');
+  return stored ? JSON.parse(stored) : null;
+});
 
   useEffect(() => {
     if (user._id) checkStatus();
-  }, []);
+  }, [user._id]);
 
   const checkStatus = async () => {
     try {
@@ -23,15 +27,53 @@ export default function Pricing() {
       // Update localStorage
       const updated = { ...user, isPro: data.isPro };
       localStorage.setItem('user', JSON.stringify(updated));
+      setUser(updated);
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handlePayment = async () => {
-    if (!user._id) {
+  // Lazy-load Razorpay checkout script only when needed
+  const loadRazorpayScript = () => {
+    return new Promise((resolve) => {
+      if (window.Razorpay) return resolve(true);
+      const existing = document.querySelector('script[data-razorpay]');
+      if (existing) {
+        existing.addEventListener('load', () => resolve(true));
+        existing.addEventListener('error', () => resolve(false));
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.setAttribute('data-razorpay', 'true');
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  // If router state indicates user came back to upgrade, trigger payment
+  useEffect(() => {
+    if (location && location.state && location.state.after === 'upgrade') {
+      // reload latest user from localStorage in case Login updated it
+      const latest = JSON.parse(localStorage.getItem('user') || '{}');
+      if (latest && latest._id) {
+        setUser(latest);
+        // call payment with the fresh user object to avoid stale closures
+        handlePayment(latest);
+      }
+      // clear router state so it doesn't re-trigger
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, user._id]);
+
+  const handlePayment = async (userParam) => {
+    const fresh = JSON.parse(localStorage.getItem('user') || '{}');
+  const u = userParam || fresh;
+  if (!u || !u._id) {
       alert('Pehle login karo!');
-      navigate('/login');
+      // redirect to login and pass the intent via router state
+      navigate('/login', { state: { from: '/pricing', after: 'upgrade' } });
       return;
     }
 
@@ -41,7 +83,7 @@ export default function Pricing() {
       const orderRes = await fetch(`${API_BASE}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user._id })
+        body: JSON.stringify({ userId: u._id })
       });
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
@@ -63,14 +105,15 @@ export default function Pricing() {
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              userId: user._id
+              userId: u._id
             })
           });
           const verifyData = await verifyRes.json();
-          if (verifyData.success) {
+            if (verifyData.success) {
             // localStorage update karo
-            const updated = { ...user, isPro: true };
+            const updated = { ...u, isPro: true };
             localStorage.setItem('user', JSON.stringify(updated));
+            setUser(updated);
             setIsPro(true);
             setSubscriptionEnd(verifyData.subscriptionEnd);
             alert('🎉 Pro plan activated! Ab sab templates use kar sakte ho!');
@@ -79,8 +122,8 @@ export default function Pricing() {
           }
         },
         prefill: {
-          name: user.name || '',
-          email: user.email || ''
+          name: u.name || '',
+          email: u.email || ''
         },
         theme: { color: '#6366f1' },
         modal: {
@@ -88,6 +131,9 @@ export default function Pricing() {
         }
       };
 
+      // ensure the checkout script is loaded
+      const ok = await loadRazorpayScript();
+      if (!ok || !window.Razorpay) throw new Error('Unable to load payment SDK');
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
@@ -258,9 +304,6 @@ export default function Pricing() {
           ))}
         </div>
       </div>
-
-      {/* Razorpay Script */}
-      <script src="https://checkout.razorpay.com/v1/checkout.js" />
     </div>
   );
 }

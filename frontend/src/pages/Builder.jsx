@@ -1,28 +1,30 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import html2pdf from 'html2pdf.js';
+import UpgradeModal from '../pages/UpgradeModal';
+
 
 const templates = [
-  { id: 'classic', name: 'Classic' },
-  { id: 'modern', name: 'Modern Blue' },
-  { id: 'creative', name: 'Creative' },
-  { id: 'minimal', name: 'Minimal' },
-  { id: 'executive', name: 'Executive' },
-  { id: 'stockholm', name: 'Stockholm' },
-  { id: 'newyork', name: 'New York' },
-  { id: 'tokyo', name: 'Tokyo' },
-  { id: 'paris', name: 'Paris' },
-  { id: 'london', name: 'London' },
-  { id: 'berlin', name: 'Berlin' },
-  { id: 'sydney', name: 'Sydney' },
-  { id: 'dubai', name: 'Dubai' },
-  { id: 'toronto', name: 'Toronto' },
-  { id: 'singapore', name: 'Singapore' },
-  { id: 'mumbai', name: 'Mumbai' },
-  { id: 'chicago', name: 'Chicago' },
-  { id: 'amsterdam', name: 'Amsterdam' },
-  { id: 'vienna', name: 'Vienna' },
-  { id: 'osaka', name: 'Osaka' },
+  { id: 'classic', name: 'Classic', free: true },
+  { id: 'modern', name: 'Modern Blue', free: true },
+  { id: 'creative', name: 'Creative', free: true },
+  { id: 'minimal', name: 'Minimal', free: false },
+  { id: 'executive', name: 'Executive', free: false },
+  { id: 'stockholm', name: 'Stockholm', free: false },
+  { id: 'newyork', name: 'New York', free: false },
+  { id: 'tokyo', name: 'Tokyo', free: false },
+  { id: 'paris', name: 'Paris', free: false },
+  { id: 'london', name: 'London', free: false },
+  { id: 'berlin', name: 'Berlin', free: false },
+  { id: 'sydney', name: 'Sydney', free: false },
+  { id: 'dubai', name: 'Dubai', free: false },
+  { id: 'toronto', name: 'Toronto', free: false },
+  { id: 'singapore', name: 'Singapore', free: false },
+  { id: 'mumbai', name: 'Mumbai', free: false },
+  { id: 'chicago', name: 'Chicago', free: false },
+  { id: 'amsterdam', name: 'Amsterdam', free: false },
+  { id: 'vienna', name: 'Vienna', free: false },
+  { id: 'osaka', name: 'Osaka', free: false },
 ];
 
 const emptyExp = { jobTitle: '', company: '', years: '', jobDesc: '' };
@@ -36,6 +38,8 @@ export default function Builder() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const savedTemplate = localStorage.getItem('selectedTemplate') || 'classic';
   const [activeTemplate, setActiveTemplate] = useState(savedTemplate);
+  const isPro = user.isPro === true;
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const photoRef = useRef();
 
   const [form, setForm] = useState({
@@ -94,7 +98,14 @@ export default function Builder() {
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save();
-  };
+  };const handleTemplateSelect = (t) => {
+  if (!t.free && !isPro) {
+    setShowUpgradeModal(true);
+    return;
+  }
+  setActiveTemplate(t.id);
+  localStorage.setItem('selectedTemplate', t.id);
+};
 
   const renderPreview = () => {
     switch (activeTemplate) {
@@ -123,6 +134,7 @@ export default function Builder() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
       <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/dashboard')} className="text-gray-400 hover:text-gray-600 text-sm">← Back</button>
@@ -134,6 +146,10 @@ export default function Builder() {
           </div>
         </div>
         <div className="flex items-center gap-3">
+          {isPro
+    ? <span style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 700 }}>💎 Pro</span>
+    : <button onClick={() => navigate('/pricing')} style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d', borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>⭐ Upgrade to Pro</button>
+  }
           <button onClick={handleDownloadPDF} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
             Download PDF ⬇
           </button>
@@ -150,7 +166,7 @@ export default function Builder() {
               <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Template (20+)</h2>
               <div className="flex flex-wrap gap-2">
                 {templates.map(t => (
-                  <button key={t.id} onClick={() => setActiveTemplate(t.id)}
+                  <button key={t.id} onClick={() => handleTemplateSelect(t)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${activeTemplate === t.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'}`}>
                     {t.name}
                   </button>

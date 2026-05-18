@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -20,7 +21,9 @@ export default function Login() {
       if (!res.ok) return alert(data.message);
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      navigate('/dashboard');
+      const redirectTo = location.state && location.state.from ? location.state.from : '/dashboard';
+      const after = location.state && location.state.after ? location.state.after : undefined;
+      navigate(redirectTo, { state: after ? { after } : {} });
     } catch (err) {
       alert('Server se connect nahi ho pa raha');
     } finally {
