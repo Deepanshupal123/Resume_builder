@@ -8,6 +8,7 @@ import Builder from './pages/Builder';
 import CoverLetter from './pages/CoverLetter';
 import ATSChecker from './pages/ATSChecker';
 import JDMatch from './pages/JDMatch';
+import Pricing from './pages/Pricing';
 // Protected route — login nahi hai toh landing pe bhejo
 function ProtectedRoute({ children }) {
   const user = localStorage.getItem('token');
@@ -25,6 +26,7 @@ function App() {
         <Route path="/cover-letter" element={<CoverLetter />} />
         <Route path="/ats-checker" element={<ATSChecker />} />
         <Route path="/jd-match" element={<JDMatch />} />
+        <Route path="/pricing" element={<Pricing />} />
         
 
         {/* Protected routes */}
