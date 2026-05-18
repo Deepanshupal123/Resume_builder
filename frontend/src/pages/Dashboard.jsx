@@ -35,14 +35,16 @@ export default function Dashboard() {
           <p className="text-gray-500">Template choose karo ya AI se generate karo</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+        {/* ===== TOP CARDS ===== */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           <div className="bg-white rounded-2xl border-2 border-blue-100 p-8 hover:border-blue-400 transition cursor-pointer"
             onClick={() => document.getElementById('templates').scrollIntoView({ behavior: 'smooth' })}>
             <div className="text-4xl mb-4">🎨</div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Template Builder</h2>
-            <p className="text-gray-500 text-sm mb-4">5 beautiful templates mein se choose karo, khud design karo aur PDF download karo</p>
+            <p className="text-gray-500 text-sm mb-4">20+ beautiful templates mein se choose karo, khud design karo aur PDF download karo</p>
             <span className="text-blue-600 text-sm font-medium">Template choose karo →</span>
           </div>
+
           <div className="bg-white rounded-2xl border-2 border-purple-100 p-8 hover:border-purple-400 transition cursor-pointer"
             onClick={() => navigate('/resume')}>
             <div className="text-4xl mb-4">🤖</div>
@@ -50,8 +52,18 @@ export default function Dashboard() {
             <p className="text-gray-500 text-sm mb-4">Details bharo — AI automatically professional resume likhega aur format karega</p>
             <span className="text-purple-600 text-sm font-medium">AI se generate karo →</span>
           </div>
+
+          {/* ✅ NEW: Cover Letter Card */}
+          <div className="bg-white rounded-2xl border-2 border-green-100 p-8 hover:border-green-400 transition cursor-pointer"
+            onClick={() => navigate('/cover-letter')}>
+            <div className="text-4xl mb-4">📝</div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Cover Letter</h2>
+            <p className="text-gray-500 text-sm mb-4">AI se professional cover letter generate karo — job description paste karo, baaki AI karega</p>
+            <span className="text-green-600 text-sm font-medium">Cover Letter banao →</span>
+          </div>
         </div>
 
+        {/* ===== TEMPLATES SECTION ===== */}
         <div id="templates">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Templates choose karo</h2>
           <p className="text-gray-500 text-sm mb-8">Koi bhi template select karo — form same rahega, sirf design badlega</p>
