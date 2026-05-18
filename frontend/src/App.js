@@ -7,7 +7,7 @@ import ResumeForm from './pages/ResumeForm';
 import Builder from './pages/Builder';
 import CoverLetter from './pages/CoverLetter';
 import ATSChecker from './pages/ATSChecker';
-
+import JDMatch from './pages/JDMatch';
 // Protected route — login nahi hai toh landing pe bhejo
 function ProtectedRoute({ children }) {
   const user = localStorage.getItem('token');
@@ -24,6 +24,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/cover-letter" element={<CoverLetter />} />
         <Route path="/ats-checker" element={<ATSChecker />} />
+        <Route path="/jd-match" element={<JDMatch />} />
         
 
         {/* Protected routes */}
