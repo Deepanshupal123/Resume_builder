@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import ResumeForm from './pages/ResumeForm';
 import Builder from './pages/Builder';
 import CoverLetter from './pages/CoverLetter';
+import ATSChecker from './pages/ATSChecker';
 
 // Protected route — login nahi hai toh landing pe bhejo
 function ProtectedRoute({ children }) {
@@ -22,6 +23,8 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/cover-letter" element={<CoverLetter />} />
+        <Route path="/ats-checker" element={<ATSChecker />} />
+        
 
         {/* Protected routes */}
         <Route path="/dashboard" element={

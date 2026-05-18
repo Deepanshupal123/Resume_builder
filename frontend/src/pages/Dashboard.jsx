@@ -53,13 +53,34 @@ export default function Dashboard() {
             <span className="text-purple-600 text-sm font-medium">AI se generate karo →</span>
           </div>
 
-          {/* ✅ NEW: Cover Letter Card */}
+          {/* Cover Letter Card */}
           <div className="bg-white rounded-2xl border-2 border-green-100 p-8 hover:border-green-400 transition cursor-pointer"
             onClick={() => navigate('/cover-letter')}>
             <div className="text-4xl mb-4">📝</div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">Cover Letter</h2>
             <p className="text-gray-500 text-sm mb-4">AI se professional cover letter generate karo — job description paste karo, baaki AI karega</p>
             <span className="text-green-600 text-sm font-medium">Cover Letter banao →</span>
+          </div>
+        </div>
+
+        {/* ===== ATS + JD ROW ===== */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+          {/* ATS Checker Card */}
+          <div className="bg-white rounded-2xl border-2 border-orange-100 p-8 hover:border-orange-400 transition cursor-pointer"
+            onClick={() => navigate('/ats-checker')}>
+            <div className="text-4xl mb-4">🎯</div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">ATS Score Checker</h2>
+            <p className="text-gray-500 text-sm mb-4">Resume paste karo + JD paste karo → AI batayega kitna match hai, missing keywords aur improvements</p>
+            <span className="text-orange-600 text-sm font-medium">Score check karo →</span>
+          </div>
+
+          {/* JD Match Card */}
+          <div className="bg-white rounded-2xl border-2 border-pink-100 p-8 hover:border-pink-400 transition cursor-pointer"
+            onClick={() => navigate('/jd-match')}>
+            <div className="text-4xl mb-4">🔍</div>
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">JD Match Analyzer</h2>
+            <p className="text-gray-500 text-sm mb-4">Job description se resume match karo — skill gap, missing keywords aur tailoring tips pao</p>
+            <span className="text-pink-600 text-sm font-medium">Match analyze karo →</span>
           </div>
         </div>
 
