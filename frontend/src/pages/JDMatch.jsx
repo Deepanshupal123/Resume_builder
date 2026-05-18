@@ -1,32 +1,65 @@
-import { useState } from 'react';
+
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = 'https://resume-builder-7ngc.onrender.com';
 
 export default function JDMatch() {
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
 
-  const [resumeText, setResumeText] = useState('');
+  const [resumeFile, setResumeFile] = useState(null);
   const [jobDescription, setJobDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
+  const [dragOver, setDragOver] = useState(false);
+
+  // ── File select / drag ────────────────────────────────────────
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) validateAndSetFile(file);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const file = e.dataTransfer.files[0];
+    if (file) validateAndSetFile(file);
+  };
+
+  const validateAndSetFile = (file) => {
+    const allowed = ['application/pdf', 'text/plain'];
+    if (!allowed.includes(file.type)) {
+      setError('Sirf PDF ya TXT file upload karo');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError('File size 5MB se kam honi chahiye');
+      return;
+    }
+    setResumeFile(file);
+    setError('');
+    setResult(null);
+  };
 
   // ── Submit ────────────────────────────────────────────────────
   const handleMatch = async () => {
-    if (!resumeText.trim()) { setError('Resume text paste karo'); return; }
+    if (!resumeFile) { setError('Resume file upload karo'); return; }
     if (!jobDescription.trim()) { setError('Job description paste karo'); return; }
-    if (resumeText.length < 100) { setError('Resume text bahut chhota hai — pura resume paste karo'); return; }
 
     setLoading(true);
     setError('');
     setResult(null);
 
     try {
+      const formData = new FormData();
+      formData.append('resume', resumeFile);
+      formData.append('jobDescription', jobDescription);
+
       const res = await fetch(`${API_BASE}/api/ai/jd-match`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resumeText, jobDescription })
+        body: formData,
       });
 
       const data = await res.json();
@@ -36,35 +69,6 @@ export default function JDMatch() {
       setError('Error: ' + err.message);
     }
     setLoading(false);
-  };
-
-  // ── Highlight matched keywords in resume ──────────────────────
-  const getHighlightedResume = () => {
-    if (!result?.matchedSkills?.length) return resumeText;
-    let highlighted = resumeText;
-    result.matchedSkills.forEach(skill => {
-      const regex = new RegExp(`(${skill})`, 'gi');
-      highlighted = highlighted.replace(regex, `__HIGHLIGHT__$1__END__`);
-    });
-    return highlighted;
-  };
-
-  const renderHighlighted = () => {
-    const text = getHighlightedResume();
-    const parts = text.split(/(__HIGHLIGHT__|__END__)/);
-    let isHighlight = false;
-    return parts.map((part, i) => {
-      if (part === '__HIGHLIGHT__') { isHighlight = true; return null; }
-      if (part === '__END__') { isHighlight = false; return null; }
-      if (isHighlight) {
-        return (
-          <mark key={i} style={{ background: '#fef08a', color: '#713f12', borderRadius: 3, padding: '1px 3px', fontWeight: 600 }}>
-            {part}
-          </mark>
-        );
-      }
-      return <span key={i}>{part}</span>;
-    });
   };
 
   // ── Score color ───────────────────────────────────────────────
@@ -93,36 +97,60 @@ export default function JDMatch() {
           ← Back
         </button>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#111827' }}>🔍 Job Description Match</h1>
-          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>Resume paste karo + JD paste karo → keyword match + skill gap analysis</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#111827' }}>🔍 JD Match Analyzer</h1>
+          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>Resume upload karo + JD paste karo → keyword match + skill gap</p>
         </div>
       </div>
 
-      <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 20px' }}>
+      <div style={{ maxWidth: 1000, margin: '0 auto', padding: '32px 20px' }}>
 
         {/* Input Section */}
         {!result && (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-              {/* Resume Text */}
+
+              {/* Resume Upload */}
               <div>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
-                  📄 Resume Text Paste Karo
+                  📄 Resume Upload (PDF / TXT)
                 </label>
-                <textarea
-                  value={resumeText}
-                  onChange={(e) => setResumeText(e.target.value)}
-                  placeholder="Apna pura resume yahan paste karo...&#10;&#10;Name, Skills, Experience, Education — sab kuch paste karo"
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
                   style={{
-                    width: '100%', height: 320, border: '2px solid #e5e7eb', borderRadius: 12,
-                    padding: 16, fontSize: 13, color: '#374151', resize: 'vertical',
-                    fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', lineHeight: 1.6
+                    border: `2px dashed ${dragOver ? '#ec4899' : resumeFile ? '#22c55e' : '#d1d5db'}`,
+                    borderRadius: 12,
+                    padding: '60px 20px',
+                    textAlign: 'center',
+                    cursor: 'pointer',
+                    background: dragOver ? '#fdf2f8' : resumeFile ? '#f0fdf4' : 'white',
+                    transition: 'all 0.2s'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#6366f1'}
-                  onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                />
-                <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4, textAlign: 'right' }}>
-                  {resumeText.length} characters
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept=".pdf,.txt"
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                  />
+                  {resumeFile ? (
+                    <>
+                      <div style={{ fontSize: 44, marginBottom: 10 }}>✅</div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: '#15803d' }}>{resumeFile.name}</div>
+                      <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>
+                        {(resumeFile.size / 1024).toFixed(1)} KB — Click to change
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 44, marginBottom: 10 }}>📤</div>
+                      <div style={{ fontSize: 15, fontWeight: 600, color: '#374151' }}>Click or Drag & Drop</div>
+                      <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>PDF ya TXT, max 5MB</div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -136,11 +164,11 @@ export default function JDMatch() {
                   onChange={(e) => setJobDescription(e.target.value)}
                   placeholder="Job description yahan paste karo...&#10;&#10;Requirements, skills, responsibilities — sab kuch paste karo"
                   style={{
-                    width: '100%', height: 320, border: '2px solid #e5e7eb', borderRadius: 12,
+                    width: '100%', height: 230, border: '2px solid #e5e7eb', borderRadius: 12,
                     padding: 16, fontSize: 13, color: '#374151', resize: 'vertical',
                     fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', lineHeight: 1.6
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#6366f1'}
+                  onFocus={(e) => e.target.style.borderColor = '#ec4899'}
                   onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
                 />
                 <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 4, textAlign: 'right' }}>
@@ -162,11 +190,11 @@ export default function JDMatch() {
                 onClick={handleMatch}
                 disabled={loading}
                 style={{
-                  background: loading ? '#9ca3af' : 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                  background: loading ? '#9ca3af' : 'linear-gradient(135deg, #ec4899, #8b5cf6)',
                   color: 'white', border: 'none', borderRadius: 12,
                   padding: '14px 48px', fontSize: 16, fontWeight: 700,
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  boxShadow: loading ? 'none' : '0 4px 20px rgba(99,102,241,0.4)',
+                  boxShadow: loading ? 'none' : '0 4px 20px rgba(236,72,153,0.4)',
                   transition: 'all 0.2s'
                 }}
               >
@@ -204,7 +232,6 @@ export default function JDMatch() {
                   <span style={{ fontSize: 20, fontWeight: 600, color: '#374151' }}>{getLabel(result.matchScore)}</span>
                 </div>
               </div>
-              {/* Mini progress bar */}
               <div style={{ flex: 1, maxWidth: 300 }}>
                 <div style={{ background: '#e5e7eb', borderRadius: 99, height: 16, overflow: 'hidden' }}>
                   <div style={{
@@ -249,44 +276,24 @@ export default function JDMatch() {
               </div>
 
               {/* Suggestions */}
-              <div style={{ background: 'white', borderRadius: 14, padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', borderTop: '4px solid #6366f1' }}>
-                <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#4f46e5' }}>
+              <div style={{ background: 'white', borderRadius: 14, padding: 20, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', borderTop: '4px solid #ec4899' }}>
+                <h3 style={{ margin: '0 0 14px', fontSize: 15, fontWeight: 700, color: '#be185d' }}>
                   💡 Suggestions
                 </h3>
                 {result.suggestions?.map((s, i) => (
                   <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10, fontSize: 13, color: '#4b5563', lineHeight: 1.5 }}>
-                    <span style={{ color: '#6366f1', flexShrink: 0, fontWeight: 700 }}>{i + 1}.</span>
+                    <span style={{ color: '#ec4899', flexShrink: 0, fontWeight: 700 }}>{i + 1}.</span>
                     {s}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Highlighted Resume Preview */}
-            <div style={{ background: 'white', borderRadius: 14, padding: 24, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 24 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: '#374151' }}>
-                  📄 Resume — Matched Keywords Highlighted
-                </h3>
-                <span style={{ background: '#fef9c3', color: '#713f12', borderRadius: 20, padding: '4px 12px', fontSize: 12, fontWeight: 500 }}>
-                  🟡 = Matched keyword
-                </span>
-              </div>
-              <div style={{
-                background: '#f9fafb', borderRadius: 10, padding: 16,
-                fontSize: 13, lineHeight: 1.8, color: '#374151',
-                maxHeight: 300, overflowY: 'auto',
-                whiteSpace: 'pre-wrap', fontFamily: 'monospace'
-              }}>
-                {renderHighlighted()}
-              </div>
-            </div>
-
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
               <button
-                onClick={() => { setResult(null); setResumeText(''); setJobDescription(''); }}
-                style={{ background: '#6366f1', color: 'white', border: 'none', borderRadius: 10, padding: '12px 28px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
+                onClick={() => { setResult(null); setResumeFile(null); setJobDescription(''); }}
+                style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', color: 'white', border: 'none', borderRadius: 10, padding: '12px 28px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
               >
                 🔄 Dobara Analyze Karo
               </button>
