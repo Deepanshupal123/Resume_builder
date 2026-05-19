@@ -38,8 +38,10 @@ router.post('/create-order', async (req, res) => {
       keyId: 'rzp_test_SrAqROP3AZEDZT'
     });
   } catch (err) {
-    console.error('Create order error:', err.message);
-    res.status(500).json({ error: err.message });
+  console.error('Create order error FULL:', err);
+  console.error('Create order error STATUS:', err?.statusCode);
+  console.error('Create order error DESCRIPTION:', err?.error?.description);
+  res.status(500).json({ error: err?.error?.description || err?.message || 'Unknown error' });
   }
 });
 
