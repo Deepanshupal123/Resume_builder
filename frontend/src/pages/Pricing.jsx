@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const API_BASE = 'https://resume-builder-7ngc.onrender.com';
 
 export default function Pricing() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [isPro, setIsPro] = useState(false);
   const [subscriptionEnd, setSubscriptionEnd] = useState(null);
   const [user, setUser] = useState(() => {
-  const stored = localStorage.getItem('user');
-  return stored ? JSON.parse(stored) : null;
-});
+    const stored = localStorage.getItem('user');
+    return stored ? JSON.parse(stored) : null;
+  });
 
   useEffect(() => {
-    if (user._id) checkStatus();
-  }, [user._id]);
+    if (user && user._id) checkStatus();
+  }, [user?._id]);
 
   const checkStatus = async () => {
     try {
@@ -24,7 +23,6 @@ export default function Pricing() {
       const data = await res.json();
       setIsPro(data.isPro);
       setSubscriptionEnd(data.subscriptionEnd);
-      // Update localStorage
       const updated = { ...user, isPro: data.isPro };
       localStorage.setItem('user', JSON.stringify(updated));
       setUser(updated);
@@ -33,7 +31,6 @@ export default function Pricing() {
     }
   };
 
-  // Lazy-load Razorpay checkout script only when needed
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
       if (window.Razorpay) return resolve(true);
@@ -52,34 +49,18 @@ export default function Pricing() {
     });
   };
 
-  // If router state indicates user came back to upgrade, trigger payment
-  useEffect(() => {
-    if (location && location.state && location.state.after === 'upgrade') {
-      // reload latest user from localStorage in case Login updated it
-      const latest = JSON.parse(localStorage.getItem('user') || '{}');
-      if (latest && latest._id) {
-        setUser(latest);
-        // call payment with the fresh user object to avoid stale closures
-        handlePayment(latest);
-      }
-      // clear router state so it doesn't re-trigger
-      navigate(location.pathname, { replace: true, state: {} });
-    }
-  }, [location, user._id]);
-
-  const handlePayment = async (userParam) => {
+  const handlePayment = async () => {
     const fresh = JSON.parse(localStorage.getItem('user') || '{}');
-  const u = userParam || fresh;
-  if (!u || !u._id) {
+    const u = fresh;
+
+    if (!u || !u._id) {
       alert('Pehle login karo!');
-      // redirect to login and pass the intent via router state
-      navigate('/login', { state: { from: '/pricing', after: 'upgrade' } });
+      navigate('/login', { state: { from: '/pricing' } });
       return;
     }
 
     setLoading(true);
     try {
-      // Step 1: Order create karo
       const orderRes = await fetch(`${API_BASE}/api/payment/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,7 +69,9 @@ export default function Pricing() {
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
 
-      // Step 2: Razorpay checkout open karo
+      const ok = await loadRazorpayScript();
+      if (!ok || !window.Razorpay) throw new Error('Unable to load payment SDK');
+
       const options = {
         key: orderData.keyId,
         amount: orderData.amount,
@@ -97,7 +80,6 @@ export default function Pricing() {
         description: 'Monthly Subscription - ₹199/month',
         order_id: orderData.orderId,
         handler: async (response) => {
-          // Step 3: Verify payment
           const verifyRes = await fetch(`${API_BASE}/api/payment/verify`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -109,8 +91,7 @@ export default function Pricing() {
             })
           });
           const verifyData = await verifyRes.json();
-            if (verifyData.success) {
-            // localStorage update karo
+          if (verifyData.success) {
             const updated = { ...u, isPro: true };
             localStorage.setItem('user', JSON.stringify(updated));
             setUser(updated);
@@ -126,14 +107,9 @@ export default function Pricing() {
           email: u.email || ''
         },
         theme: { color: '#6366f1' },
-        modal: {
-          ondismiss: () => setLoading(false)
-        }
+        modal: { ondismiss: () => setLoading(false) }
       };
 
-      // ensure the checkout script is loaded
-      const ok = await loadRazorpayScript();
-      if (!ok || !window.Razorpay) throw new Error('Unable to load payment SDK');
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err) {
@@ -174,7 +150,6 @@ export default function Pricing() {
       </div>
 
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 20px' }}>
-        {/* Title */}
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{ fontSize: 36, fontWeight: 800, color: '#111827', margin: '0 0 12px' }}>
             Simple, Transparent Pricing
@@ -214,7 +189,6 @@ export default function Pricing() {
               </div>
               <p style={{ fontSize: 14, color: '#6b7280', margin: '8px 0 0' }}>Hamesha free</p>
             </div>
-
             <div style={{ marginBottom: 28 }}>
               {FREE_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 12, fontSize: 14, color: '#374151' }}>
@@ -222,7 +196,6 @@ export default function Pricing() {
                 </div>
               ))}
             </div>
-
             <button
               onClick={() => navigate('/dashboard')}
               style={{
@@ -242,7 +215,6 @@ export default function Pricing() {
             boxShadow: '0 8px 32px rgba(99,102,241,0.35)',
             position: 'relative', overflow: 'hidden'
           }}>
-            {/* Popular badge */}
             <div style={{
               position: 'absolute', top: 16, right: 16,
               background: '#fbbf24', color: '#78350f',
@@ -250,7 +222,6 @@ export default function Pricing() {
             }}>
               ⭐ Most Popular
             </div>
-
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Pro</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
@@ -259,7 +230,6 @@ export default function Pricing() {
               </div>
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: '8px 0 0' }}>Sab kuch unlock karo</p>
             </div>
-
             <div style={{ marginBottom: 28 }}>
               {PRO_FEATURES.map((f, i) => (
                 <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 12, fontSize: 14, color: 'white' }}>
@@ -267,15 +237,12 @@ export default function Pricing() {
                 </div>
               ))}
             </div>
-
             {isPro ? (
-              <button
-                style={{
-                  width: '100%', padding: '13px', borderRadius: 10,
-                  border: 'none', background: 'rgba(255,255,255,0.25)',
-                  fontSize: 15, fontWeight: 600, color: 'white', cursor: 'default'
-                }}
-              >
+              <button style={{
+                width: '100%', padding: '13px', borderRadius: 10,
+                border: 'none', background: 'rgba(255,255,255,0.25)',
+                fontSize: 15, fontWeight: 600, color: 'white', cursor: 'default'
+              }}>
                 ✅ Active Plan
               </button>
             ) : (
@@ -287,8 +254,7 @@ export default function Pricing() {
                   border: 'none', background: 'white',
                   fontSize: 15, fontWeight: 700, color: '#6366f1',
                   cursor: loading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                  transition: 'transform 0.1s'
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }}
               >
                 {loading ? '⏳ Processing...' : '🚀 Upgrade to Pro — ₹199/mo'}
