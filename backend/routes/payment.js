@@ -2,32 +2,26 @@ const express = require('express');
 const router = express.Router();
 const Razorpay = require('razorpay');
 const crypto = require('crypto');
-const mongoose = require('mongoose');
-console.log('RAZORPAY_KEY_ID:', process.env.RAZORPAY_KEY_ID);
-console.log('RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'NOT SET');
+
+const User = require('../models/User');
 
 // Razorpay instance
 const razorpay = new Razorpay({
-  key_id: 'rzp_test_SrAqROP3AZEDZT',
-  key_secret: 'UPU2b5PhCvup5VfClIP9Xq7d'
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
 });
-// ── User Model (subscription field add) ──────────────────────────────────────
-const User = require('../models/User');
 
-// ── Route 1: Create Order ─────────────────────────────────────────────────────
+// Route 1: Create Order
 router.post('/create-order', async (req, res) => {
   try {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ error: 'User ID required' });
 
     const options = {
-      amount: 19900, // ₹199 in paise
+      amount: 19900,
       currency: 'INR',
       receipt: `r_${Date.now()}`,
-      notes: {
-        userId: userId,
-        plan: 'pro_monthly'
-      }
+      notes: { userId, plan: 'pro_monthly' }
     };
 
     const order = await razorpay.orders.create(options);
@@ -35,25 +29,22 @@ router.post('/create-order', async (req, res) => {
       orderId: order.id,
       amount: order.amount,
       currency: order.currency,
-      keyId: 'rzp_test_SrAqROP3AZEDZT'
+      keyId: process.env.RAZORPAY_KEY_ID
     });
   } catch (err) {
-  console.error('Create order error FULL:', err);
-  console.error('Create order error STATUS:', err?.statusCode);
-  console.error('Create order error DESCRIPTION:', err?.error?.description);
-  res.status(500).json({ error: err?.error?.description || err?.message || 'Unknown error' });
+    console.error('Create order error:', err?.error?.description || err?.message);
+    res.status(500).json({ error: err?.error?.description || err?.message || 'Unknown error' });
   }
 });
 
-// ── Route 2: Verify Payment ───────────────────────────────────────────────────
+// Route 2: Verify Payment
 router.post('/verify', async (req, res) => {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId } = req.body;
 
-    // Signature verify karo
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
-      .createHmac('sha256', 'UPU2b5PhCvup5VfClIP9Xq7d')
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
       .update(body.toString())
       .digest('hex');
 
@@ -61,28 +52,23 @@ router.post('/verify', async (req, res) => {
       return res.status(400).json({ error: 'Payment verification failed' });
     }
 
-    // User ko Pro upgrade karo
     const subscriptionEnd = new Date();
-    subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1); // 1 month
+    subscriptionEnd.setMonth(subscriptionEnd.getMonth() + 1);
 
     await User.findByIdAndUpdate(userId, {
       isPro: true,
-      subscriptionEnd: subscriptionEnd,
+      subscriptionEnd,
       paymentId: razorpay_payment_id
     });
 
-    res.json({
-      success: true,
-      message: 'Payment verified! Pro plan activated.',
-      subscriptionEnd: subscriptionEnd
-    });
+    res.json({ success: true, message: 'Pro plan activated!', subscriptionEnd });
   } catch (err) {
-    console.error('Verify payment error:', err.message);
+    console.error('Verify error:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ── Route 3: Check Subscription Status ───────────────────────────────────────
+// Route 3: Check Status
 router.get('/status/:userId', async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
@@ -91,15 +77,11 @@ router.get('/status/:userId', async (req, res) => {
     const now = new Date();
     const isActive = user.isPro && user.subscriptionEnd && new Date(user.subscriptionEnd) > now;
 
-    // Expired ho gaya toh reset karo
     if (user.isPro && !isActive) {
       await User.findByIdAndUpdate(req.params.userId, { isPro: false });
     }
 
-    res.json({
-      isPro: isActive,
-      subscriptionEnd: user.subscriptionEnd || null
-    });
+    res.json({ isPro: isActive, subscriptionEnd: user.subscriptionEnd || null });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
