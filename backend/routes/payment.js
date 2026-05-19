@@ -8,10 +8,9 @@ console.log('RAZORPAY_KEY_SECRET:', process.env.RAZORPAY_KEY_SECRET ? 'SET' : 'N
 
 // Razorpay instance
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET
+  key_id: 'rzp_test_SrAqROP3AZEDZT',
+  key_secret: 'UPU2b5PhCvup5VfClIP9Xq7d'
 });
-
 // ── User Model (subscription field add) ──────────────────────────────────────
 const User = require('../models/User');
 
@@ -52,7 +51,7 @@ router.post('/verify', async (req, res) => {
     // Signature verify karo
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .createHmac('sha256', 'UPU2b5PhCvup5VfClIP9Xq7d')
       .update(body.toString())
       .digest('hex');
 
