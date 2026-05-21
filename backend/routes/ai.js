@@ -181,5 +181,119 @@ Respond ONLY in this exact JSON format (no extra text):
     res.status(500).json({ error: err.message });
   }
 });
+router.post('/resume-analysis', async (req, res) => {
+  try {
+    const { resumeText } = req.body;
+
+    if (!resumeText) {
+      return res.status(400).json({
+        error: 'Resume text required'
+      });
+    }
+
+    const prompt = `You are an expert ATS resume analyzer and career coach.
+
+Analyze this resume carefully and return ONLY valid JSON.
+
+RESUME:
+${resumeText.substring(0, 5000)}
+
+Return ONLY this JSON format:
+
+{
+  "overallScore": <number 0-100>,
+  "atsScore": <number 0-100>,
+  "contentScore": <number 0-100>,
+  "formatScore": <number 0-100>,
+
+  "strengths": [
+    "strength1",
+    "strength2",
+    "strength3"
+  ],
+
+  "missingKeywords": [
+    "keyword1",
+    "keyword2",
+    "keyword3",
+    "keyword4",
+    "keyword5"
+  ],
+
+  "sections": {
+    "experience": {
+      "score": <number>,
+      "feedback": "feedback text"
+    },
+
+    "skills": {
+      "score": <number>,
+      "feedback": "feedback text"
+    },
+
+    "education": {
+      "score": <number>,
+      "feedback": "feedback text"
+    },
+
+    "summary": {
+      "score": <number>,
+      "feedback": "feedback text"
+    }
+  },
+
+  "improvements": [
+    {
+      "title": "title",
+      "detail": "detail"
+    },
+
+    {
+      "title": "title",
+      "detail": "detail"
+    },
+
+    {
+      "title": "title",
+      "detail": "detail"
+    }
+  ],
+
+  "verdict": "overall final verdict"
+}`;
+
+    const rawText = await callGroq(prompt, 1400);
+
+    console.log(
+      'Resume Analysis Raw:',
+      rawText.substring(0, 300)
+    );
+
+    let result;
+
+    try {
+      const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+
+      result = JSON.parse(
+        jsonMatch ? jsonMatch[0] : rawText
+      );
+    } catch (err) {
+      console.log('JSON Parse Error:', err.message);
+
+      return res.status(500).json({
+        error: 'AI response parse nahi hua'
+      });
+    }
+
+    res.json(result);
+
+  } catch (err) {
+    console.error('Resume Analysis Error:', err.message);
+
+    res.status(500).json({
+      error: err.message
+    });
+  }
+});
  
 module.exports = router;
