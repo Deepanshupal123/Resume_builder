@@ -13,7 +13,7 @@ export function useScrollAnimation() {
       { threshold: 0.12 }
     );
 
-    // Sabhi .scroll-hidden elements observe karo
+    // Observe all .scroll-hidden elements
     const elements = document.querySelectorAll('.scroll-hidden');
     elements.forEach((el) => observer.observe(el));
 

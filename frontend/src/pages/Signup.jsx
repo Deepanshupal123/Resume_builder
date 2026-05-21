@@ -23,7 +23,7 @@ export default function Signup() {
       alert('Signup successful! Please login to continue.');
       navigate('/');
     } catch (err) {
-      alert('Server se connect nahi ho pa raha');
+      alert('Unable to connect to server');
     } finally {
       setLoading(false);
     }
@@ -41,7 +41,7 @@ export default function Signup() {
         </div>
 
         <h1 className="text-2xl font-semibold text-gray-900 mb-1">Create account</h1>
-        <p className="text-gray-500 text-sm mb-6">ResumeAI pe free mein join karo</p>
+        <p className="text-gray-500 text-sm mb-6">Join ResumeAI for free</p>
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
@@ -50,7 +50,7 @@ export default function Signup() {
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="Aapka naam"
+              placeholder="Your name"
               className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
@@ -87,7 +87,7 @@ export default function Signup() {
         </form>
 
         <p className="text-center text-sm text-gray-500 mt-4">
-          Already account hai?{' '}
+          Already have an account?{' '}
           <Link to="/" className="text-blue-600 font-medium">Login</Link>
         </p>
       </div>

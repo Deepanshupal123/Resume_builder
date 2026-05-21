@@ -31,11 +31,11 @@ export default function JDMatch() {
   const validateAndSetFile = (file) => {
     const allowed = ['application/pdf', 'text/plain'];
     if (!allowed.includes(file.type)) {
-      setError('Sirf PDF ya TXT file upload karo');
+      setError('Please upload only PDF or TXT files');
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      setError('File size 5MB se kam honi chahiye');
+      setError('File size must be less than 5MB');
       return;
     }
     setResumeFile(file);
@@ -45,8 +45,8 @@ export default function JDMatch() {
 
   // ── Submit ────────────────────────────────────────────────────
   const handleMatch = async () => {
-    if (!resumeFile) { setError('Resume file upload karo'); return; }
-    if (!jobDescription.trim()) { setError('Job description paste karo'); return; }
+    if (!resumeFile) { setError('Please upload your resume file'); return; }
+    if (!jobDescription.trim()) { setError('Please paste the job description'); return; }
 
     setLoading(true);
     setError('');
@@ -98,7 +98,7 @@ export default function JDMatch() {
         </button>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#111827' }}>🔍 JD Match Analyzer</h1>
-          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>Resume upload karo + JD paste karo → keyword match + skill gap</p>
+          <p style={{ margin: 0, fontSize: 13, color: '#6b7280' }}>Upload resume + paste job description → keyword match + skill gap</p>
         </div>
       </div>
 
@@ -148,7 +148,7 @@ export default function JDMatch() {
                     <>
                       <div style={{ fontSize: 44, marginBottom: 10 }}>📤</div>
                       <div style={{ fontSize: 15, fontWeight: 600, color: '#374151' }}>Click or Drag & Drop</div>
-                      <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>PDF ya TXT, max 5MB</div>
+                      <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>PDF or TXT, max 5MB</div>
                     </>
                   )}
                 </div>
@@ -157,12 +157,12 @@ export default function JDMatch() {
               {/* Job Description */}
               <div>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 8 }}>
-                  💼 Job Description Paste Karo
+                  💼 Paste Job Description
                 </label>
                 <textarea
                   value={jobDescription}
                   onChange={(e) => setJobDescription(e.target.value)}
-                  placeholder="Job description yahan paste karo...&#10;&#10;Requirements, skills, responsibilities — sab kuch paste karo"
+                  placeholder="Paste the job description here...\n\nRequirements, skills, responsibilities — include everything"
                   style={{
                     width: '100%', height: 230, border: '2px solid #e5e7eb', borderRadius: 12,
                     padding: 16, fontSize: 13, color: '#374151', resize: 'vertical',
@@ -198,7 +198,7 @@ export default function JDMatch() {
                   transition: 'all 0.2s'
                 }}
               >
-                {loading ? '⏳ Analyzing...' : '🔍 Match Analyze Karo'}
+                {loading ? '⏳ Analyzing...' : '🔍 Analyze Match'}
               </button>
             </div>
           </>
@@ -208,8 +208,8 @@ export default function JDMatch() {
         {loading && (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
             <div style={{ fontSize: 48, marginBottom: 16 }}>🔍</div>
-            <div style={{ fontSize: 16, color: '#6b7280' }}>AI keywords analyze kar raha hai...</div>
-            <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 8 }}>10-15 seconds lag sakte hain</div>
+            <div style={{ fontSize: 16, color: '#6b7280' }}>AI is analyzing keywords...</div>
+            <div style={{ fontSize: 13, color: '#9ca3af', marginTop: 8 }}>May take 10–15 seconds</div>
           </div>
         )}
 
@@ -291,11 +291,11 @@ export default function JDMatch() {
 
             {/* Action Buttons */}
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
+                <button
                 onClick={() => { setResult(null); setResumeFile(null); setJobDescription(''); }}
                 style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', color: 'white', border: 'none', borderRadius: 10, padding: '12px 28px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
               >
-                🔄 Dobara Analyze Karo
+                🔄 Analyze Again
               </button>
               <button
                 onClick={() => navigate('/ats-checker')}

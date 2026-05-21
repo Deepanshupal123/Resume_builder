@@ -25,7 +25,7 @@ export default function Login() {
       const after = location.state && location.state.after ? location.state.after : undefined;
       navigate(redirectTo, { state: after ? { after } : {} });
     } catch (err) {
-      alert('Server se connect nahi ho pa raha');
+      alert('Unable to connect to server');
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export default function Login() {
           </button>
         </form>
         <p className="text-center text-sm text-gray-500 mt-4">
-          Account nahi hai?{' '}
+          Don't have an account?{' '}
           <Link to="/signup" className="text-blue-600 font-medium">Sign up</Link>
         </p>
       </div>

@@ -86,7 +86,7 @@ export default function ResumeForm() {
       <div className="max-w-7xl mx-auto py-10 px-4 flex gap-8">
         <div className="w-full max-w-xl flex-shrink-0">
           <h1 className="text-2xl font-semibold text-gray-900 mb-1">Build your resume</h1>
-          <p className="text-gray-500 text-sm mb-6">Details bharo — AI baaki kaam karega ✨</p>
+          <p className="text-gray-500 text-sm mb-6">Fill details — AI will handle the rest ✨</p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -126,7 +126,7 @@ export default function ResumeForm() {
               <div className="mt-4">
                 <label className="text-sm text-gray-600">Professional summary (optional)</label>
                 <textarea name="summary" value={form.summary} onChange={handleChange}
-                  placeholder="Apne baare mein 2-3 lines likho..."
+                  placeholder="Write 2-3 lines about yourself..."
                   rows={3}
                   className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
@@ -155,9 +155,9 @@ export default function ResumeForm() {
                 </div>
               </div>
               <div className="mt-4">
-                <label className="text-sm text-gray-600">Kya kaam kiya?</label>
+                <label className="text-sm text-gray-600">What did you do?</label>
                 <textarea name="jobDesc" value={form.jobDesc} onChange={handleChange}
-                  placeholder="- React se dashboard banaya&#10;- API integration ki"
+                  placeholder="- Built React dashboard\n- Integrated REST APIs"
                   rows={4}
                   className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
@@ -189,7 +189,7 @@ export default function ResumeForm() {
 
             <button type="submit" disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-60">
-              {loading ? '⏳ AI resume bana raha hai...' : 'Generate Resume with AI ✨'}
+              {loading ? '⏳ AI is creating your resume...' : 'Generate Resume with AI ✨'}
             </button>
           </form>
         </div>

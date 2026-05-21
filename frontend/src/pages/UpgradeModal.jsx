@@ -28,8 +28,8 @@ export default function UpgradeModal({ onClose }) {
           Pro Template
         </h2>
         <p style={{ margin: '0 0 24px', fontSize: 14, color: '#6b7280', lineHeight: 1.6 }}>
-          Yeh template Pro plan mein available hai.<br />
-          Sirf <strong style={{ color: '#6366f1' }}>₹199/month</strong> mein sab 20+ templates unlock karo!
+          This template is available on the Pro plan.<br />
+          Unlock all 20+ premium templates for <strong style={{ color: '#6366f1' }}>₹199/month</strong>!
         </p>
 
         {/* Features list */}
@@ -72,7 +72,7 @@ export default function UpgradeModal({ onClose }) {
             fontSize: 14, fontWeight: 500, cursor: 'pointer'
           }}
         >
-          Free plan se continue karo
+          Continue with Free plan
         </button>
       </div>
     </div>

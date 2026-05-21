@@ -54,7 +54,7 @@ export default function Pricing() {
     const u = fresh;
 
     if (!u || !u._id) {
-      alert('Pehle login karo!');
+      alert('Please login first!');
       navigate('/login', { state: { from: '/pricing' } });
       return;
     }
@@ -77,7 +77,7 @@ export default function Pricing() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: 'ResumeAI Pro',
-        description: 'Monthly Subscription - ₹199/month',
+        description: 'Monthly Subscription - ₹10/month',
         order_id: orderData.orderId,
         handler: async (response) => {
           const verifyRes = await fetch(`${API_BASE}/api/payment/verify`, {
@@ -91,15 +91,15 @@ export default function Pricing() {
             })
           });
           const verifyData = await verifyRes.json();
-          if (verifyData.success) {
+            if (verifyData.success) {
             const updated = { ...u, isPro: true };
             localStorage.setItem('user', JSON.stringify(updated));
             setUser(updated);
             setIsPro(true);
             setSubscriptionEnd(verifyData.subscriptionEnd);
-            alert('🎉 Pro plan activated! Ab sab templates use kar sakte ho!');
+            alert('🎉 Pro plan activated! You can now use all templates!');
           } else {
-            alert('Payment verification failed. Support se contact karo.');
+            alert('Payment verification failed. Please contact support.');
           }
         },
         prefill: {
@@ -155,7 +155,7 @@ export default function Pricing() {
             Simple, Transparent Pricing
           </h2>
           <p style={{ fontSize: 16, color: '#6b7280', margin: 0 }}>
-            Free mein shuru karo — jab ready ho tab upgrade karo
+            Start free — upgrade when ready
           </p>
         </div>
 
@@ -187,7 +187,7 @@ export default function Pricing() {
                 <span style={{ fontSize: 42, fontWeight: 800, color: '#111827' }}>₹0</span>
                 <span style={{ fontSize: 16, color: '#6b7280' }}>/month</span>
               </div>
-              <p style={{ fontSize: 14, color: '#6b7280', margin: '8px 0 0' }}>Hamesha free</p>
+              <p style={{ fontSize: 14, color: '#6b7280', margin: '8px 0 0' }}>Always free</p>
             </div>
             <div style={{ marginBottom: 28 }}>
               {FREE_FEATURES.map((f, i) => (
@@ -225,10 +225,10 @@ export default function Pricing() {
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Pro</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 42, fontWeight: 800, color: 'white' }}>₹199</span>
-                <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)' }}>/month</span>
+                <span style={{ fontSize: 42, fontWeight: 800, color: 'white' }}>₹10</span>
+                 <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)' }}>/month</span>
               </div>
-              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: '8px 0 0' }}>Sab kuch unlock karo</p>
+              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: '8px 0 0' }}>Unlock everything</p>
             </div>
             <div style={{ marginBottom: 28 }}>
               {PRO_FEATURES.map((f, i) => (

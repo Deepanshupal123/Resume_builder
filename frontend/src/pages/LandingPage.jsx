@@ -125,24 +125,24 @@ export default function LandingPage() {
   ];
 
   const features = [
-    { icon: '🤖', title: 'AI-Powered Writing', desc: 'Groq AI se professional resume content generate hoga seconds mein' },
+    { icon: '🤖', title: 'AI-Powered Writing', desc: 'Generate professional resume content in seconds with AI' },
     { icon: '🎨', title: '10 Premium Templates', desc: 'Stockholm, New York, Dubai — world-class designs' },
-    { icon: '📊', title: 'ATS Score Checker', desc: 'Recruiter ke ATS system se match karo apna resume' },
-    { icon: '⚡', title: 'Live Preview', desc: 'Type karo aur instantly dekho resume kaisa dikhega' },
-    { icon: '📱', title: 'Mobile Friendly', desc: 'Kahi bhi, kabhi bhi apna resume banao' },
-    { icon: '💾', title: 'PDF Download', desc: 'One click mein professional PDF download karo' },
+    { icon: '📊', title: 'ATS Score Checker', desc: 'Match your resume to ATS systems' },
+    { icon: '⚡', title: 'Live Preview', desc: 'Type and instantly preview how your resume will look' },
+    { icon: '📱', title: 'Mobile Friendly', desc: 'Build your resume anywhere, anytime' },
+    { icon: '💾', title: 'PDF Download', desc: 'Download a professional PDF with one click' },
   ];
 
   const steps = [
-    { num: '01', title: 'Details Bharo', desc: 'Apni personal info, experience aur skills fill karo simple form mein' },
-    { num: '02', title: 'AI Generate Kare', desc: 'Hamara AI aapki details se professional resume content likhega' },
-    { num: '03', title: 'Download Karo', desc: 'Apna pasandida template choose karo aur PDF download karo' },
+    { num: '01', title: 'Fill Details', desc: 'Enter your personal info, experience, and skills in a simple form' },
+    { num: '02', title: 'AI Generate', desc: 'Our AI will generate professional resume content from your details' },
+    { num: '03', title: 'Download', desc: 'Choose your preferred template and download PDF' },
   ];
 
   const testimonials = [
-    { name: 'Rahul Sharma', role: 'Software Developer, Bangalore', text: 'ResumeAI ne mera resume itna professional bana diya ki mujhe 3 interviews mile ek hafte mein!', avatar: '👨‍💻', company: 'Hired at TCS' },
-    { name: 'Priya Patel', role: 'MBA Graduate, Mumbai', text: 'Mujhe nahi pata tha resume kaise likhte hain — ResumeAI ne sab automatically kar diya!', avatar: '👩‍💼', company: 'Hired at Deloitte' },
-    { name: 'Arjun Singh', role: 'Fresh Graduate, Delhi', text: 'Stockholm template ne mere resume ko bilkul LinkedIn level bana diya. Highly recommended!', avatar: '👨‍🎓', company: 'Hired at Infosys' },
+    { name: 'Rahul Sharma', role: 'Software Developer, Bangalore', text: 'ResumeAI made my resume so professional that I received 3 interviews in one week!', avatar: '👨‍💻', company: 'Hired at TCS' },
+    { name: 'Priya Patel', role: 'MBA Graduate, Mumbai', text: "I didn't know how to write a resume — ResumeAI handled it all automatically!", avatar: '👩‍💼', company: 'Hired at Deloitte' },
+    { name: 'Arjun Singh', role: 'Fresh Graduate, Delhi', text: 'The Stockholm template made my resume LinkedIn-ready. Highly recommended!', avatar: '👨‍🎓', company: 'Hired at Infosys' },
   ];
 
   return (
@@ -199,18 +199,18 @@ export default function LandingPage() {
             <h1 style={{ fontSize: '54px', fontWeight: '800', lineHeight: '1.08', marginBottom: '20px', color: '#0f172a' }}>
               Job-Winning Resume<br />
               <span style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Banao Minutes Mein
+                Build in Minutes
               </span>
             </h1>
 
             <p style={{ fontSize: '18px', color: '#64748b', lineHeight: '1.75', marginBottom: '34px', maxWidth: '460px' }}>
-              AI se professional resume generate karo. 10 world-class templates. ATS-friendly format. Bilkul free mein shuru karo!
+              Generate professional resumes with AI. 10 world-class templates. ATS-friendly format. Start for free!
             </p>
 
             <div style={{ display: 'flex', gap: '14px', marginBottom: '44px', flexWrap: 'wrap' }}>
               <button className="btn-primary" onClick={() => navigate('/signup')}
                 style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', border: 'none', borderRadius: '12px', padding: '15px 30px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', color: '#fff', boxShadow: '0 4px 20px rgba(37,99,235,0.42)' }}>
-                🚀 Free Resume Banao
+                🚀 Build Free Resume
               </button>
               <button className="btn-sec" onClick={() => navigate('/login')}
                 style={{ background: '#fff', border: '2px solid #e5e7eb', borderRadius: '12px', padding: '15px 28px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', color: '#111' }}>
@@ -280,7 +280,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>How It Works</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>3 Steps Mein Resume Ready</h2>
+            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Resume Ready in 3 Steps</h2>
           </div>
           <div style={{ display: 'flex', gap: '32px', position: 'relative' }}>
             <div style={{ position: 'absolute', top: '36px', left: '16%', right: '16%', height: '2px', background: 'linear-gradient(90deg,#2563eb,#7c3aed)', zIndex: 0 }} />
@@ -302,7 +302,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Features</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Sab Kuch Ek Jagah</h2>
+            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Everything in One Place</h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '24px' }}>
             {features.map((f, i) => (
@@ -323,7 +323,7 @@ export default function LandingPage() {
           <div className="sa" style={{ textAlign: 'center', marginBottom: '56px' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Templates</div>
             <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>10 World-Class Designs</h2>
-            <p style={{ fontSize: '16px', color: '#64748b', marginTop: '12px' }}>Stockholm se Dubai tak — har profession ke liye perfect template</p>
+            <p style={{ fontSize: '16px', color: '#64748b', marginTop: '12px' }}>From Stockholm to Dubai — templates suited for every profession</p>
           </div>
 
           {/* Tab buttons */}
@@ -364,7 +364,7 @@ export default function LandingPage() {
           <div className="sa" style={{ textAlign: 'center', marginTop: '36px' }}>
             <button className="btn-primary" onClick={() => navigate('/signup')}
               style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', border: 'none', borderRadius: '12px', padding: '14px 34px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', color: '#fff', boxShadow: '0 4px 18px rgba(37,99,235,0.38)' }}>
-              Sab Templates Dekho →
+              View All Templates →
             </button>
           </div>
         </div>
@@ -375,7 +375,7 @@ export default function LandingPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Testimonials</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Log Kya Kehte Hain</h2>
+            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>What People Say</h2>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '24px' }}>
             {testimonials.map((t, i) => (
@@ -403,7 +403,7 @@ export default function LandingPage() {
           <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Pricing</div>
             <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Simple Pricing</h2>
-            <p style={{ fontSize: '16px', color: '#64748b', marginTop: '12px' }}>Shuru karo free mein — jab chahein upgrade karo</p>
+            <p style={{ fontSize: '16px', color: '#64748b', marginTop: '12px' }}>Start free — upgrade anytime</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
             {[
@@ -451,13 +451,13 @@ export default function LandingPage() {
       {/* ══════════ CTA BANNER ══════════ */}
       <section style={{ padding: '90px 48px', background: 'linear-gradient(135deg,#2563eb,#7c3aed)' }}>
         <div className="sa" style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '42px', fontWeight: '800', color: '#fff', marginBottom: '16px', lineHeight: '1.15' }}>Aaj Hi Apna Dream Job Resume Banao!</h2>
+          <h2 style={{ fontSize: '42px', fontWeight: '800', color: '#fff', marginBottom: '16px', lineHeight: '1.15' }}>Build Your Dream Job Resume Today!</h2>
           <p style={{ fontSize: '17px', color: 'rgba(255,255,255,0.85)', marginBottom: '36px', lineHeight: '1.7' }}>
-            50,000+ professionals ne ResumeAI use karke apna dream job paya. Aap bhi try karo — bilkul free!
+            50,000+ professionals used ResumeAI to land their dream jobs. Try it for free!
           </p>
           <button className="btn-primary" onClick={() => navigate('/signup')}
             style={{ background: '#fff', border: 'none', borderRadius: '14px', padding: '17px 44px', fontSize: '17px', fontWeight: '800', cursor: 'pointer', color: '#2563eb', boxShadow: '0 6px 24px rgba(0,0,0,0.18)' }}>
-            🚀 Free Mein Shuru Karo
+            🚀 Get Started Free
           </button>
         </div>
       </section>

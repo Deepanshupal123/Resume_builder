@@ -273,7 +273,7 @@ export default function Builder() {
               <input name="skills" value={form.skills} onChange={handleChange}
                 placeholder="React, Node.js, Python, MongoDB, AWS"
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <p className="text-xs text-gray-400 mt-1">Comma se alag karo</p>
+              <p className="text-xs text-gray-400 mt-1">Separate using commas</p>
             </div>
 
             <div>

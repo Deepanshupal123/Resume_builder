@@ -9,7 +9,7 @@ import CoverLetter from './pages/CoverLetter';
 import ATSChecker from './pages/ATSChecker';
 import JDMatch from './pages/JDMatch';
 import Pricing from './pages/Pricing';
-// Protected route — login nahi hai toh landing pe bhejo
+// Protected route — if not logged in, redirect to landing
 function ProtectedRoute({ children }) {
   const user = localStorage.getItem('token');
   return user ? children : <Navigate to="/login" />;

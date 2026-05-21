@@ -370,7 +370,7 @@ Write 3 compelling paragraphs. Be specific, professional, and concise.`
             <div>
               <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">✏️ Edit Body Manually</h3>
               <textarea name="body" value={form.body} onChange={handleChange}
-                placeholder="AI se generate karo ya yahan khud likho..."
+                placeholder="Generate with AI or write manually here..."
                 rows={10}
                 className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               {form.body && (
