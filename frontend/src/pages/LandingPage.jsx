@@ -1,498 +1,770 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useAnimation, useInView } from 'framer-motion';
 
-/* ─── Scroll Animation Hook ─── */
-function useScrollAnimation() {
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          entry.target.classList.add('sav');
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -100px 0px' }
-    );
-    const els = document.querySelectorAll('.sa');
-    els.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
-}
-
-/* ─── Count-Up Hook ─── */
-function useCountUp(target, suffix = '', duration = 2000) {
-  const ref = useRef(null);
-  const triggered = useRef(false);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting || triggered.current) return;
-        triggered.current = true;
-        let start = 0;
-        const step = target / (duration / 16);
-        const timer = setInterval(() => {
-          start += step;
-          if (start >= target) { start = target; clearInterval(timer); }
-          if (ref.current) ref.current.textContent = Math.floor(start).toLocaleString() + suffix;
-        }, 16);
-      },
-      { threshold: 0.5 }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [target, suffix, duration]);
-  return ref;
-}
-
-/* ─── Global CSS injected once ─── */
-const css = `
-  @keyframes fadeUp   { from{opacity:0;transform:translateY(32px)} to{opacity:1;transform:translateY(0)} }
-  @keyframes slideL   { from{opacity:0;transform:translateX(-44px)} to{opacity:1;transform:translateX(0)} }
-  @keyframes slideR   { from{opacity:0;transform:translateX(44px)} to{opacity:1;transform:translateX(0)} }
-  @keyframes scaleIn  { from{opacity:0;transform:scale(0.9)} to{opacity:1;transform:scale(1)} }
-  @keyframes floatY   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-
-  .hero-left  { animation: slideL 0.75s cubic-bezier(.22,.68,0,1.2) both; }
-  .hero-right { animation: slideR 0.75s cubic-bezier(.22,.68,0,1.2) 0.15s both; }
-  .hero-badge { animation: scaleIn 0.5s ease 0.05s both; }
-  .float-card { animation: floatY 4s ease-in-out infinite; }
-
-  /* scroll-animate: hidden until .sav added */
-  .sa { opacity:0; transform:translateY(28px); transition:opacity 0.6s ease,transform 0.6s ease; }
-  .sa.sav, .sav { opacity:1; transform:translateY(0); }
-  .d1{transition-delay:0.05s} .d2{transition-delay:0.15s} .d3{transition-delay:0.25s}
-  .d4{transition-delay:0.35s} .d5{transition-delay:0.45s} .d6{transition-delay:0.55s}
-
-  /* hover lift */
-  .lift { transition:transform 0.25s ease,box-shadow 0.25s ease; }
-  .lift:hover { transform:translateY(-6px); box-shadow:0 16px 40px rgba(0,0,0,0.10); }
-
-  /* button pulse */
-  .btn-primary { transition:transform 0.2s ease,box-shadow 0.2s ease; }
-  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(37,99,235,0.45)!important; }
-  .btn-primary:active { transform:translateY(0); }
-
-  .btn-sec { transition:border-color 0.2s,background 0.2s; }
-  .btn-sec:hover { background:#f0f4ff!important; border-color:#2563eb!important; }
-
-  /* navbar link */
-  .nav-link { position:relative; }
-  .nav-link::after { content:''; position:absolute; bottom:-2px; left:0; width:0; height:2px;
-    background:linear-gradient(90deg,#2563eb,#7c3aed); transition:width 0.25s ease; }
-  .nav-link:hover::after { width:100%; }
-
-  /* template tab */
-  .tmpl-btn { transition:all 0.2s ease; }
-  .tmpl-btn:hover { background:#e0e7ff!important; color:#2563eb!important; }
-`;
-
-export default function LandingPage() {
+export default function ExecutiveSlateLanding() {
   const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
-  const [activeTemplate, setActiveTemplate] = useState(0);
-  const [menuOpen, setMenuOpen] = useState(false);
-
-  useScrollAnimation();
-
-  const usersRef   = useCountUp(50000,  'K+'.replace('K+',''), 2000);
-  // Simple stat refs — we'll just show static values for rating
-  const resumeRef  = useCountUp(120000, '', 2200);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Inject CSS once
-  useEffect(() => {
-    if (!document.getElementById('rai-anim')) {
-      const s = document.createElement('style');
-      s.id = 'rai-anim';
-      s.textContent = css;
-      document.head.appendChild(s);
-    }
-  }, []);
-
-  const templates = ['Stockholm', 'New York', 'Vienna', 'Dubai', 'Tokyo'];
-  const templateColors = [
-    'linear-gradient(90deg,#2563eb,#7c3aed)',
-    '#0f172a',
-    '#7c3aed',
-    'linear-gradient(90deg,#d97706,#b45309)',
-    'linear-gradient(90deg,#dc2626,#b91c1c)',
-  ];
-
-  const features = [
-    { icon: '🤖', title: 'AI-Powered Writing', desc: 'Generate professional resume content in seconds with AI' },
-    { icon: '🎨', title: '10 Premium Templates', desc: 'Stockholm, New York, Dubai — world-class designs' },
-    { icon: '📊', title: 'ATS Score Checker', desc: 'Match your resume to ATS systems' },
-    { icon: '⚡', title: 'Live Preview', desc: 'Type and instantly preview how your resume will look' },
-    { icon: '📱', title: 'Mobile Friendly', desc: 'Build your resume anywhere, anytime' },
-    { icon: '💾', title: 'PDF Download', desc: 'Download a professional PDF with one click' },
-  ];
-
-  const steps = [
-    { num: '01', title: 'Fill Details', desc: 'Enter your personal info, experience, and skills in a simple form' },
-    { num: '02', title: 'AI Generate', desc: 'Our AI will generate professional resume content from your details' },
-    { num: '03', title: 'Download', desc: 'Choose your preferred template and download PDF' },
-  ];
-
-  const testimonials = [
-    { name: 'Rahul Sharma', role: 'Software Developer, Bangalore', text: 'ResumeAI made my resume so professional that I received 3 interviews in one week!', avatar: '👨‍💻', company: 'Hired at TCS' },
-    { name: 'Priya Patel', role: 'MBA Graduate, Mumbai', text: "I didn't know how to write a resume — ResumeAI handled it all automatically!", avatar: '👩‍💼', company: 'Hired at Deloitte' },
-    { name: 'Arjun Singh', role: 'Fresh Graduate, Delhi', text: 'The Stockholm template made my resume LinkedIn-ready. Highly recommended!', avatar: '👨‍🎓', company: 'Hired at Infosys' },
-  ];
-
   return (
-    <div style={{ fontFamily: 'Inter,Arial,sans-serif', color: '#111', background: '#fff', overflowX: 'hidden', scrollBehavior: 'smooth' }}>
+    <div className="bg-[#f7f9fb] font-['Inter',sans-serif] text-[14px] leading-[20px] font-normal text-[#191c1e] min-h-screen flex flex-col antialiased">
 
-      {/* ══════════ NAVBAR ══════════ */}
-      <nav style={{
-        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 200,
-        background: scrolled ? 'rgba(255,255,255,0.96)' : 'transparent',
-        backdropFilter: scrolled ? 'blur(14px)' : 'none',
-        borderBottom: scrolled ? '1px solid #f3f4f6' : 'none',
-        padding: '16px 48px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        transition: 'all 0.35s ease',
-      }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <div style={{ width: '34px', height: '34px', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', borderRadius: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(37,99,235,0.35)' }}>
-            <span style={{ color: '#fff', fontWeight: '800', fontSize: '17px' }}>R</span>
+      {/* ─── GOOGLE FONTS & MATERIAL ICONS INJECTION ─── */}
+      <CustomAssetInjector />
+
+      {/* ─── STICKY HEADER ─── */}
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.5 }}
+        className={`w-full top-0 sticky z-50 transition-all duration-300 bg-white border-b ${scrolled ? 'shadow-sm border-gray-200' : 'border-[#E2E8F0]'
+          }`}>
+        <nav className="flex justify-between items-center w-full px-4 md:px-16 py-4 max-w-[1200px] mx-auto">
+          <div className="font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold text-black tracking-tight">
+            ATS Resume
           </div>
-          <span style={{ fontWeight: '800', fontSize: '18px', color: '#0f172a' }}>ResumeAI</span>
-        </div>
 
-        {/* Desktop links */}
-        <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-          {['features','templates','pricing'].map(id => (
-            <a key={id} href={`#${id}`} className="nav-link"
-              style={{ color: '#555', textDecoration: 'none', fontSize: '14px', fontWeight: '500', textTransform: 'capitalize' }}>
-              {id}
+          <div className="hidden md:flex items-center gap-8">
+            <a href="#features" className="text-[14px] leading-[20px] uppercase font-bold tracking-wider text-[#45464d] hover:text-black transition-colors">
+              Features
             </a>
-          ))}
-          <button className="btn-sec" onClick={() => navigate('/login')}
-            style={{ background: 'none', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '8px 18px', fontSize: '14px', fontWeight: '500', cursor: 'pointer', color: '#111' }}>
-            Login
-          </button>
-          <button className="btn-primary" onClick={() => navigate('/signup')}
-            style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', border: 'none', borderRadius: '9px', padding: '9px 22px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', color: '#fff', boxShadow: '0 3px 14px rgba(37,99,235,0.38)' }}>
-            Get Started Free
-          </button>
-        </div>
-      </nav>
-
-      {/* ══════════ HERO ══════════ */}
-      <section style={{ minHeight: '100vh', background: 'linear-gradient(135deg,#f0f4ff 0%,#faf5ff 50%,#fff 100%)', display: 'flex', alignItems: 'center', padding: '110px 48px 70px' }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '60px', width: '100%' }}>
-
-          {/* Left */}
-          <div className="hero-left" style={{ flex: 1 }}>
-            <div className="hero-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '20px', padding: '7px 16px', marginBottom: '26px' }}>
-              <span>✨</span>
-              <span style={{ fontSize: '12px', color: '#2563eb', fontWeight: '700' }}>AI-Powered Resume Builder — Free</span>
-            </div>
-
-            <h1 style={{ fontSize: '54px', fontWeight: '800', lineHeight: '1.08', marginBottom: '20px', color: '#0f172a' }}>
-              Job-Winning Resume<br />
-              <span style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Build in Minutes
-              </span>
-            </h1>
-
-            <p style={{ fontSize: '18px', color: '#64748b', lineHeight: '1.75', marginBottom: '34px', maxWidth: '460px' }}>
-              Generate professional resumes with AI. 10 world-class templates. ATS-friendly format. Start for free!
-            </p>
-
-            <div style={{ display: 'flex', gap: '14px', marginBottom: '44px', flexWrap: 'wrap' }}>
-              <button className="btn-primary" onClick={() => navigate('/signup')}
-                style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', border: 'none', borderRadius: '12px', padding: '15px 30px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', color: '#fff', boxShadow: '0 4px 20px rgba(37,99,235,0.42)' }}>
-                🚀 Build Free Resume
-              </button>
-              <button className="btn-sec" onClick={() => navigate('/login')}
-                style={{ background: '#fff', border: '2px solid #e5e7eb', borderRadius: '12px', padding: '15px 28px', fontSize: '16px', fontWeight: '600', cursor: 'pointer', color: '#111' }}>
-                Login →
-              </button>
-            </div>
-
-            {/* Stats */}
-            <div style={{ display: 'flex', gap: '36px' }}>
-              <div>
-                <div ref={usersRef} style={{ fontSize: '24px', fontWeight: '800', color: '#2563eb' }}>0</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>Users</div>
-              </div>
-              <div>
-                <div ref={resumeRef} style={{ fontSize: '24px', fontWeight: '800', color: '#2563eb' }}>0</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>Resumes</div>
-              </div>
-              <div>
-                <div style={{ fontSize: '24px', fontWeight: '800', color: '#2563eb' }}>4.8★</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', fontWeight: '500' }}>Rating</div>
-              </div>
-            </div>
+            <a href="#templates" className="text-[14px] leading-[20px] uppercase font-bold tracking-wider text-[#45464d] hover:text-black transition-colors">
+              Templates
+            </a>
+            <a href="#pricing" className="text-[14px] leading-[20px] uppercase font-bold tracking-wider text-[#45464d] hover:text-black transition-colors">
+              Pricing
+            </a>
           </div>
 
-          {/* Right — Resume Card */}
-          <div className="hero-right float-card" style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-            <div style={{ background: '#fff', borderRadius: '18px', boxShadow: '0 24px 70px rgba(37,99,235,0.13)', padding: '28px', width: '340px', border: '1px solid #e8edf5', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '-14px', right: '-14px', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', borderRadius: '10px', padding: '7px 14px', color: '#fff', fontSize: '11px', fontWeight: '800', boxShadow: '0 4px 12px rgba(37,99,235,0.4)' }}>
-                AI Generated ✨
-              </div>
-              <div style={{ textAlign: 'center', borderBottom: '2px solid #2563eb', paddingBottom: '14px', marginBottom: '14px' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', margin: '0 auto 10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '20px' }}>👤</div>
-                <div style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a' }}>Rahul Sharma</div>
-                <div style={{ fontSize: '11px', color: '#2563eb', fontWeight: '600' }}>Full Stack Developer</div>
-                <div style={{ fontSize: '9px', color: '#94a3b8', marginTop: '4px' }}>rahul@email.com • +91 98765 43210 • Delhi</div>
-              </div>
-              <ResumeSection title="Summary">
-                <p style={{ fontSize: '9px', color: '#555', lineHeight: '1.6', margin: 0 }}>Results-driven developer with 3+ years experience building scalable web applications...</p>
-              </ResumeSection>
-              <ResumeSection title="Skills">
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-                  {['React','Node.js','MongoDB','Python','AWS'].map(s => (
-                    <span key={s} style={{ background: '#eff6ff', color: '#2563eb', padding: '2px 7px', borderRadius: '10px', fontSize: '8px', fontWeight: '700' }}>{s}</span>
-                  ))}
-                </div>
-              </ResumeSection>
-              <ResumeSection title="Experience">
-                <div style={{ fontSize: '9px' }}>
-                  <div style={{ fontWeight: '700', color: '#0f172a' }}>Software Developer</div>
-                  <div style={{ color: '#666', fontStyle: 'italic' }}>TCS • 2022–Present</div>
-                  <div style={{ color: '#555', marginTop: '3px', lineHeight: '1.5' }}>• Built React dashboards serving 10K+ users<br />• Reduced load time by 40%</div>
-                </div>
-              </ResumeSection>
-              <ResumeSection title="Education">
-                <div style={{ fontSize: '9px' }}>
-                  <div style={{ fontWeight: '700' }}>B.Tech Computer Science</div>
-                  <div style={{ color: '#666' }}>IIT Delhi • 2022</div>
-                </div>
-              </ResumeSection>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════ HOW IT WORKS ══════════ */}
-      <section style={{ padding: '90px 48px', background: '#fff' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-          <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>How It Works</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Resume Ready in 3 Steps</h2>
-          </div>
-          <div style={{ display: 'flex', gap: '32px', position: 'relative' }}>
-            <div style={{ position: 'absolute', top: '36px', left: '16%', right: '16%', height: '2px', background: 'linear-gradient(90deg,#2563eb,#7c3aed)', zIndex: 0 }} />
-            {steps.map((step, i) => (
-              <div key={i} className={`sa d${i + 1}`} style={{ flex: 1, textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', margin: '0 auto 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 24px rgba(37,99,235,0.32)' }}>
-                  <span style={{ color: '#fff', fontSize: '20px', fontWeight: '800' }}>{step.num}</span>
-                </div>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>{step.title}</h3>
-                <p style={{ fontSize: '14px', color: '#64748b', lineHeight: '1.65' }}>{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════ FEATURES ══════════ */}
-      <section id="features" style={{ padding: '90px 48px', background: '#f8fafc', scrollMarginTop: '100px' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Features</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Everything in One Place</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '24px' }}>
-            {features.map((f, i) => (
-              <div key={i} className={`sa lift d${i + 1}`}
-                style={{ background: '#fff', borderRadius: '18px', padding: '30px', border: '1px solid #f1f5f9', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '34px', marginBottom: '14px' }}>{f.icon}</div>
-                <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#0f172a', marginBottom: '8px' }}>{f.title}</h3>
-                <p style={{ fontSize: '13px', color: '#64748b', lineHeight: '1.65', margin: 0 }}>{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════ TEMPLATES ══════════ */}
-      <section id="templates" style={{ padding: '90px 48px', background: '#fff', scrollMarginTop: '100px' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div className="sa" style={{ textAlign: 'center', marginBottom: '56px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Templates</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>10 World-Class Designs</h2>
-            <p style={{ fontSize: '16px', color: '#64748b', marginTop: '12px' }}>From Stockholm to Dubai — templates suited for every profession</p>
-          </div>
-
-          {/* Tab buttons */}
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '32px', flexWrap: 'wrap' }}>
-            {templates.map((t, i) => (
-              <button key={i} className="tmpl-btn" onClick={() => setActiveTemplate(i)}
-                style={{ padding: '9px 22px', borderRadius: '20px', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: '700',
-                  background: activeTemplate === i ? 'linear-gradient(135deg,#2563eb,#7c3aed)' : '#f1f5f9',
-                  color: activeTemplate === i ? '#fff' : '#64748b',
-                  boxShadow: activeTemplate === i ? '0 4px 14px rgba(37,99,235,0.35)' : 'none',
-                }}>
-                {t}
-              </button>
-            ))}
-          </div>
-
-          {/* Template previews */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '20px' }}>
-            {[0, 1, 2].map((i) => {
-              const idx = (activeTemplate + i) % templates.length;
-              return (
-                <div key={i} className={`sa lift d${i + 1}`}
-                  style={{ background: '#f8fafc', borderRadius: '14px', padding: '20px', border: `2px solid ${i === 0 ? '#2563eb' : '#f1f5f9'}`, position: 'relative', overflow: 'hidden' }}>
-                  {i === 0 && <div style={{ position: 'absolute', top: '10px', right: '10px', background: '#2563eb', color: '#fff', fontSize: '9px', fontWeight: '800', padding: '3px 10px', borderRadius: '10px' }}>Popular</div>}
-                  <div style={{ background: '#fff', borderRadius: '10px', padding: '16px', boxShadow: '0 2px 10px rgba(0,0,0,0.06)' }}>
-                    <div style={{ height: '8px', background: templateColors[idx], borderRadius: '4px', marginBottom: '10px' }} />
-                    <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '3px', marginBottom: '6px', width: '60%' }} />
-                    <div style={{ height: '4px', background: '#f1f5f9', borderRadius: '2px', marginBottom: '4px' }} />
-                    <div style={{ height: '4px', background: '#f1f5f9', borderRadius: '2px', marginBottom: '4px', width: '80%' }} />
-                    <div style={{ height: '4px', background: '#f1f5f9', borderRadius: '2px', width: '70%' }} />
-                  </div>
-                  <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '12px', fontWeight: '700', color: '#64748b' }}>{templates[idx]}</div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="sa" style={{ textAlign: 'center', marginTop: '36px' }}>
-            <button className="btn-primary" onClick={() => navigate('/signup')}
-              style={{ background: 'linear-gradient(135deg,#2563eb,#7c3aed)', border: 'none', borderRadius: '12px', padding: '14px 34px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', color: '#fff', boxShadow: '0 4px 18px rgba(37,99,235,0.38)' }}>
-              View All Templates →
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/login')} className="text-[14px] leading-[20px] uppercase font-bold tracking-wider text-[#45464d] hover:text-black transition-colors cursor-pointer">
+              Login
+            </button>
+            <button onClick={() => navigate('/login')} className="bg-black text-white px-6 py-2 rounded text-[14px] leading-[20px] uppercase font-bold tracking-wider cursor-pointer active:scale-95 transition-all">
+              Get Access Free
             </button>
           </div>
-        </div>
-      </section>
+        </nav>
+      </motion.header>
 
-      {/* ══════════ TESTIMONIALS ══════════ */}
-      <section style={{ padding: '90px 48px', background: '#f8fafc' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Testimonials</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>What People Say</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '24px' }}>
-            {testimonials.map((t, i) => (
-              <div key={i} className={`sa lift d${i + 1}`}
-                style={{ background: '#fff', borderRadius: '18px', padding: '30px', border: '1px solid #f1f5f9', boxShadow: '0 2px 10px rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '20px', marginBottom: '14px', letterSpacing: '2px' }}>⭐⭐⭐⭐⭐</div>
-                <p style={{ fontSize: '13px', color: '#444', lineHeight: '1.75', marginBottom: '18px', fontStyle: 'italic' }}>"{t.text}"</p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <div style={{ width: '38px', height: '38px', borderRadius: '50%', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '17px', flexShrink: 0 }}>{t.avatar}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13px', fontWeight: '700', color: '#111' }}>{t.name}</div>
-                    <div style={{ fontSize: '11px', color: '#94a3b8' }}>{t.role}</div>
-                  </div>
-                  <div style={{ background: '#f0fdf4', color: '#16a34a', fontSize: '10px', fontWeight: '700', padding: '3px 10px', borderRadius: '10px', flexShrink: 0 }}>{t.company}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <main className="flex-grow">
 
-      {/* ══════════ PRICING ══════════ */}
-      <section id="pricing" style={{ padding: '90px 48px', background: '#fff', scrollMarginTop: '100px' }}>
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <div className="sa" style={{ textAlign: 'center', marginBottom: '60px' }}>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#2563eb', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '12px' }}>Pricing</div>
-            <h2 style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a' }}>Simple Pricing</h2>
-            <p style={{ fontSize: '16px', color: '#64748b', marginTop: '12px' }}>Start free — upgrade anytime</p>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '28px' }}>
-            {[
-              {
-                name: 'Free', price: '₹0', period: 'forever',
-                bg: '#f8fafc', border: '#e5e7eb',
-                btnBg: '#f1f5f9', btnColor: '#111', btnText: 'Get Started Free',
-                features: ['1 Resume download','3 Basic templates','AI generation (3/month)','PDF export'],
-              },
-              {
-                name: 'Pro', price: '₹199', period: '/month', popular: true,
-                bg: 'linear-gradient(160deg,#eff6ff,#f5f3ff)', border: '#2563eb',
-                btnBg: 'linear-gradient(135deg,#2563eb,#7c3aed)', btnColor: '#fff', btnText: 'Start Pro — ₹199/mo',
-                features: ['Unlimited resumes','All 10 templates','AI generation unlimited','ATS Score checker','Cover letter AI','Job tracker','LinkedIn optimizer','Priority support'],
-              },
-            ].map((plan, i) => (
-              <div key={i} className={`sa lift d${i + 1}`}
-                style={{ background: plan.bg, borderRadius: '22px', padding: '34px', border: `2px solid ${plan.border}`, position: 'relative' }}>
-                {plan.popular && (
-                  <div style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', color: '#fff', fontSize: '11px', fontWeight: '800', padding: '5px 18px', borderRadius: '20px', whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(37,99,235,0.4)' }}>
-                    Most Popular
-                  </div>
-                )}
-                <div style={{ fontSize: '20px', fontWeight: '800', color: '#0f172a', marginBottom: '4px' }}>{plan.name}</div>
-                <div style={{ fontSize: '38px', fontWeight: '800', color: '#0f172a', marginBottom: '6px' }}>
-                  {plan.price}<span style={{ fontSize: '14px', color: '#94a3b8', fontWeight: '400' }}>{plan.period}</span>
+        {/* ─── HERO SECTION ─── */}
+        <ScrollReveal>
+          <section className="relative pt-16 pb-24 md:pt-24 md:pb-32 overflow-hidden px-4 md:px-16 max-w-[1200px] mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="flex flex-col items-start gap-8"
+              >
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#e6e8ea] rounded-full">
+                  <span className="material-symbols-outlined text-[16px] text-[#0051d5]">auto_awesome</span>
+                  <span className="text-[12px] leading-[16px] letter-spacing-[0.05em] font-get font-semibold uppercase tracking-wider text-[#45464d]">
+                    AI-Powered Resume Builder - Free
+                  </span>
                 </div>
-                <div style={{ margin: '24px 0', display: 'flex', flexDirection: 'column', gap: '11px' }}>
-                  {plan.features.map((f, j) => (
-                    <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '9px', fontSize: '13px', color: '#444' }}>
-                      <span style={{ color: '#16a34a', fontWeight: '800', fontSize: '15px' }}>✓</span> {f}
+
+                <h1 className="font-['Source_Serif_4',serif] text-[48px] leading-[56px] font-bold tracking-[-0.02em] text-black">
+                  Build Your <span className="text-[#0051d5]">Job-Winning Resume</span> in Minutes
+                </h1>
+
+                <p className="text-[16px] leading-[24px] font-normal text-[#45464d] max-w-[500px]">
+                  Generate professional, ATS-friendly resumes using AI with world-class templates. Tailored for precision and authority.
+                </p>
+
+                <div className="flex flex-wrap gap-4">
+                  <button className="bg-[#0F172A] text-white px-8 py-4 rounded-lg text-[18px] leading-[28px] font-semibold hover:bg-black transition-colors active:scale-95">
+                    Build Your Resume Now
+                  </button>
+                  <button className="border border-[#0F172A] text-[#0F172A] px-8 py-4 rounded-lg text-[18px] leading-[28px] font-semibold hover:bg-[#f2f4f6] transition-colors active:scale-95">
+                    View Templates
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-8 pt-4">
+                  <div>
+                    <div className="font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold">50,000+</div>
+                    <div className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">
+                      Active Users
                     </div>
-                  ))}
+                  </div>
+                  <div className="w-px h-8 bg-[#E2E8F0]"></div>
+                  <div>
+                    <div className="font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold">120,000+</div>
+                    <div className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">
+                      Resumes Generated
+                    </div>
+                  </div>
                 </div>
-                <button className="btn-primary" onClick={() => navigate('/signup')}
-                  style={{ width: '100%', background: plan.btnBg, border: 'none', borderRadius: '11px', padding: '13px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', color: plan.btnColor }}>
-                  {plan.btnText}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+              </motion.div>
 
-      {/* ══════════ CTA BANNER ══════════ */}
-      <section style={{ padding: '90px 48px', background: 'linear-gradient(135deg,#2563eb,#7c3aed)' }}>
-        <div className="sa" style={{ maxWidth: '700px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '42px', fontWeight: '800', color: '#fff', marginBottom: '16px', lineHeight: '1.15' }}>Build Your Dream Job Resume Today!</h2>
-          <p style={{ fontSize: '17px', color: 'rgba(255,255,255,0.85)', marginBottom: '36px', lineHeight: '1.7' }}>
-            50,000+ professionals used ResumeAI to land their dream jobs. Try it for free!
-          </p>
-          <button className="btn-primary" onClick={() => navigate('/signup')}
-            style={{ background: '#fff', border: 'none', borderRadius: '14px', padding: '17px 44px', fontSize: '17px', fontWeight: '800', cursor: 'pointer', color: '#2563eb', boxShadow: '0 6px 24px rgba(0,0,0,0.18)' }}>
-            🚀 Get Started Free
-          </button>
-        </div>
-      </section>
-
-      {/* ══════════ FOOTER ══════════ */}
-      <footer style={{ background: '#0f172a', color: '#94a3b8', padding: '44px 48px' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div style={{ width: '30px', height: '30px', background: 'linear-gradient(135deg,#2563eb,#7c3aed)', borderRadius: '7px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: '#fff', fontWeight: '800', fontSize: '15px' }}>R</span>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, rotate: -5 }}
+                whileInView={{ opacity: 1, scale: 1, rotate: 2 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                className="relative flex justify-center"
+              >
+                <div className="bg-white p-4 rounded-lg border border-[#E2E8F0] w-full max-w-[450px] transform rotate-2 shadow-[0px_4px_20px_rgba(15,23,42,0.05)]">
+                  <img
+                    alt="Resume Template Preview"
+                    className="w-full rounded-sm"
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZ_mrpKqVQCDqpLqKhpkdrjwp8ZHyNvs5vF9uu3LX13GClL0ztHjaCch-IxODoNYQsjb30YOtRpzW9K9f9Y1ReUfHnn1Mf7MPCVvBipzTQb-wcSOtbGgkdgXDaMLtlWm7P1AYsEkqCkjBeclgWVJKbCLZR-HE5b-r1qn9etdKNJ_am1TV3gO4gaKOmCRHE8FyZq20duQdXBHuy1f9ayvDFiiR_iAQl4oIFFU1qWHqC5TmUeNHWYiocUdVXmLM2yUlOPn4eshajhcg"
+                  />
+                  <div className="absolute -top-4 -left-4 bg-[#0051d5] text-white px-4 py-2 rounded-lg text-[12px] leading-[16px] font-semibold tracking-[0.05em] uppercase shadow-lg">
+                    ATS Friendly
+                  </div>
+                </div>
+              </motion.div>
             </div>
-            <span style={{ color: '#fff', fontWeight: '800', fontSize: '16px' }}>ResumeAI</span>
+          </section>
+        </ScrollReveal>
+
+        {/* ─── HOW IT WORKS SECTION ─── */}
+        <ScrollReveal>
+          <section className="py-24 bg-[#f2f4f6] px-4 md:px-16">
+            <div className="max-w-[1200px] mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-16"
+              >
+                <span className="text-[12px] leading-[16px] font-semibold tracking-widest text-[#0051d5] uppercase block mb-4">
+                  The Process
+                </span>
+                <h2 className="font-['Source_Serif_4',serif] text-[32px] leading-[40px] font-bold text-black">
+                  Resume Ready in 3 Easy Steps
+                </h2>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                <div className="hidden md:block absolute top-8 left-1/4 right-1/4 h-0.5 bg-[#E2E8F0] z-0"></div>
+
+                {/* Step 1 */}
+                <StaggeredCard index={0}>
+                  <div className="flex flex-col items-center text-center gap-6 relative z-10">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.1 }}
+                      className="w-16 h-16 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold"
+                    >
+                      01
+                    </motion.div>
+                    <div>
+                      <h3 className="text-[18px] leading-[28px] font-semibold text-black mb-2">Fill Your Details</h3>
+                      <p className="text-[14px] leading-[20px] text-[#45464d]">
+                        Enter your experience, education, and skills into our intuitive, focused builder.
+                      </p>
+                    </div>
+                  </div>
+                </StaggeredCard>
+
+                {/* Step 2 */}
+                <StaggeredCard index={1}>
+                  <div className="flex flex-col items-center text-center gap-6 relative z-10">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.2 }}
+                      className="w-16 h-16 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold"
+                    >
+                      02
+                    </motion.div>
+                    <div>
+                      <h3 className="text-[18px] leading-[28px] font-semibold text-black mb-2">AI Generation</h3>
+                      <p className="text-[14px] leading-[20px] text-[#45464d]">
+                        Our executive AI enhances your descriptions to match high-level industry standards.
+                      </p>
+                    </div>
+                  </div>
+                </StaggeredCard>
+
+                {/* Step 3 */}
+                <StaggeredCard index={2}>
+                  <div className="flex flex-col items-center text-center gap-6 relative z-10">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                      className="w-16 h-16 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold"
+                    >
+                      03
+                    </motion.div>
+                    <div>
+                      <h3 className="text-[18px] leading-[28px] font-semibold text-black mb-2">Download PDF</h3>
+                      <p className="text-[14px] leading-[20px] text-[#45464d]">
+                        Choose your template and export a professional, pixel-perfect PDF in one click.
+                      </p>
+                    </div>
+                  </div>
+                </StaggeredCard>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ─── FEATURES BENTO GRID ─── */}
+        <ScrollReveal>
+          <section className="py-24 px-4 md:px-16 max-w-[1200px] mx-auto" id="features">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-16"
+            >
+              <span className="text-[12px] leading-[16px] font-semibold tracking-widest text-[#0051d5] uppercase block mb-4">
+                Precision Tools
+              </span>
+              <h2 className="font-['Source_Serif_4',serif] text-[32px] leading-[40px] font-bold text-black">
+                Everything You Need to Get Hired
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Feature 1 */}
+              <StaggeredCard index={0}>
+                <div className="border border-[#E2E8F0] p-8 rounded-lg hover:border-black transition-colors group">
+                  <span className="material-symbols-outlined text-[#0051d5] mb-4 text-[32px]">edit_note</span>
+                  <h3 className="text-[18px] leading-[28px] font-semibold mb-2 text-black">AI-Powered Writing</h3>
+                  <p className="text-[14px] leading-[20px] text-[#45464d]">
+                    Smart bullet points and professional summaries generated in seconds using enterprise-grade LLMs.
+                  </p>
+                </div>
+              </StaggeredCard>
+
+              {/* Feature 2 */}
+              <StaggeredCard index={1}>
+                <div className="border border-[#E2E8F0] p-8 rounded-lg hover:border-black transition-colors group">
+                  <span className="material-symbols-outlined text-[#0051d5] mb-4 text-[32px]">style</span>
+                  <h3 className="text-[18px] leading-[28px] font-semibold mb-2 text-black">Premium Templates</h3>
+                  <p className="text-[14px] leading-[20px] text-[#45464d]">
+                    Modern, classic, and creative designs crafted by senior recruitment experts.
+                  </p>
+                </div>
+              </StaggeredCard>
+
+              {/* Feature 3 */}
+              <StaggeredCard index={2}>
+                <div className="border border-[#E2E8F0] p-8 rounded-lg hover:border-black transition-colors group">
+                  <span className="material-symbols-outlined text-[#0051d5] mb-4 text-[32px]">analytics</span>
+                  <h3 className="text-[18px] leading-[28px] font-semibold mb-2 text-black">ATS Score Checker</h3>
+                  <p className="text-[14px] leading-[20px] text-[#45464d]">
+                    Instantly verify if your resume will pass through automated screening systems.
+                  </p>
+                </div>
+              </StaggeredCard>
+
+              {/* Feature 4 */}
+              <StaggeredCard index={3}>
+                <div className="border border-[#E2E8F0] p-8 rounded-lg hover:border-black transition-colors group">
+                  <span className="material-symbols-outlined text-[#0051d5] mb-4 text-[32px]">visibility</span>
+                  <h3 className="text-[18px] leading-[28px] font-semibold mb-2 text-black">Live Preview</h3>
+                  <p className="text-[14px] leading-[20px] text-[#45464d]">
+                    See your changes reflected on the document canvas in real-time as you type.
+                  </p>
+                </div>
+              </StaggeredCard>
+
+              {/* Feature 5 */}
+              <StaggeredCard index={4}>
+                <div className="border border-[#E2E8F0] p-8 rounded-lg hover:border-black transition-colors group">
+                  <span className="material-symbols-outlined text-[#0051d5] mb-4 text-[32px]">devices</span>
+                  <h3 className="text-[18px] leading-[28px] font-semibold mb-2 text-black">Mobile Friendly</h3>
+                  <p className="text-[14px] leading-[20px] text-[#45464d]">
+                    Craft your career story on the go with our fully responsive web application.
+                  </p>
+                </div>
+              </StaggeredCard>
+
+              {/* Feature 6 */}
+              <StaggeredCard index={5}>
+                <div className="border border-[#E2E8F0] p-8 rounded-lg hover:border-black transition-colors group">
+                  <span className="material-symbols-outlined text-[#0051d5] mb-4 text-[32px]">download</span>
+                  <h3 className="text-[18px] leading-[28px] font-semibold mb-2 text-black">One-Click PDF</h3>
+                  <p className="text-[14px] leading-[20px] text-[#45464d]">
+                    Standardized A4 and Letter formats ready for upload or direct email attachment.
+                  </p>
+                </div>
+              </StaggeredCard>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ─── WORLD-CLASS TEMPLATES SECTION ─── */}
+        <ScrollReveal>
+          <section className="py-24 bg-white px-4 md:px-16" id="templates">
+            <div className="max-w-[1200px] mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-16"
+              >
+                <span className="text-[12px] leading-[16px] font-semibold tracking-widest text-[#0051d5] uppercase block mb-4">
+                  Classic View
+                </span>
+                <h2 className="font-['Source_Serif_4',serif] text-[32px] leading-[40px] font-bold text-black">
+                  10 World-Class Professional Designs
+                </h2>
+                <p className="text-[14px] leading-[20px] text-[#45464d] mt-4">
+                  Curated layouts for executives, software engineers, and creative professionals.
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Template Card 1 */}
+                <StaggeredCard index={0}>
+                  <div className="group cursor-pointer">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] mb-4 group-hover:border-[#0051d5] transition-all"
+                    >
+                      <img
+                        alt="The Executive Template"
+                        className="w-full h-80 object-cover"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzWgaGrSw8iCY1LytqSG2kJNH6cXaayqb5UoyrI7FlC2cGCYtPUCaRclqosLmm3jrLNW4RZa8f1p0e4D-oJQR9ElFL_pmYfXbx4SZSDoKDxFM_asOatrhNdTTXBRBigYZN_66cPjljtZ84BzS4ftiDXg62NC_euWhu7k1HEa0tY09Hc46VtFvm1p8KXFQHNGaN1U_x4gHcOEyFbJG-xIS5RJPhSQPxDzKFLV6-05PSge2HRf3XH4TAdwbi7AAcWP0hVMoIHTA3Dlk"
+                      />
+                    </motion.div>
+                    <h4 className="text-[18px] leading-[28px] font-semibold text-black">The Executive</h4>
+                    <p className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">Minimalist • Corporate</p>
+                  </div>
+                </StaggeredCard>
+
+                {/* Template Card 2 */}
+                <StaggeredCard index={1}>
+                  <div className="group cursor-pointer">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] mb-4 group-hover:border-[#0051d5] transition-all"
+                    >
+                      <img
+                        alt="The Modernist Template"
+                        className="w-full h-80 object-cover"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnPN6hebardFmHmvamL3S4K1Ty_a5xhDwmMkLIbrhl59x8GMubpYleJBc9JfMeQOFJWcCKhmWTFV3BDebJ9l6gNCx3KOj3_5bYnIckRjQoY_LrFnVM2Psax0QLnsYs-z_Q7UK2fRPdCAd0Dae_03IU3qVemdrfYBtyJu2qHfSOjsOVEntVYnR3DcOzv6ZiuNFcHyaG_leDishPy-XLNl8Z3JnIqJuxqBCTvQW76ObJPk0E2WT-PkustegUXVds6mU-aoD3dUcv9ys"
+                      />
+                    </motion.div>
+                    <h4 className="text-[18px] leading-[28px] font-semibold text-black">The Modernist</h4>
+                    <p className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">Clean • Tech-Ready</p>
+                  </div>
+                </StaggeredCard>
+
+                {/* Template Card 3 */}
+                <StaggeredCard index={2}>
+                  <div className="group cursor-pointer">
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-white border border-[#E2E8F0] rounded-lg overflow-hidden shadow-[0px_4px_20px_rgba(15,23,42,0.05)] mb-4 group-hover:border-[#0051d5] transition-all"
+                    >
+                      <img
+                        alt="The Cambridge Template"
+                        className="w-full h-80 object-cover"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBG2mRl6lnbqV_ncj9MMc-dNXPpBgFvy7FupAh0oCNYGuG5tw3aQk3QjJtC36ovHS9yVnR-bHn-gqtmmN7vzfFgXTBlCFgg6cX-CcHitDY5gv3yXONdwsRpFAbRpHqfZG0jw1OHHhFcB5BTPCuxbwXnbqmdLVgY8m6LOWxz0y-pmJxnRUmCR6DzBSz5CRTzBrsdgISgtVw2U0FxBaaQRHdLtS-hDizvVCXgBvpNqBqj50NpjsG-b2A93Aj7y9fjuXFbmHQvEBvtNH0"
+                      />
+                    </motion.div>
+                    <h4 className="text-[18px] leading-[28px] font-semibold text-black">The Cambridge</h4>
+                    <p className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">Traditional • Academic</p>
+                  </div>
+                </StaggeredCard>
+              </div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="mt-12 text-center"
+              >
+                <button className="bg-[#0051d5] text-white px-8 py-3 rounded-lg text-[18px] leading-[28px] font-semibold hover:bg-[#2563EB] transition-colors inline-flex items-center gap-2">
+                  Browse All Templates <span className="material-symbols-outlined">arrow_forward</span>
+                </button>
+              </motion.div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ─── TESTIMONIALS SECTION ─── */}
+        <ScrollReveal>
+          <section className="py-24 px-4 md:px-16 max-w-[1200px] mx-auto">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.5 }}
+              className="text-center mb-16"
+            >
+              <span className="text-[12px] leading-[16px] font-semibold tracking-widest text-[#0051d5] uppercase block mb-4">
+                Success Stories
+              </span>
+              <h2 className="font-['Source_Serif_4',serif] text-[32px] leading-[40px] font-bold text-black">
+                What Our Users Are Saying
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Testimonial 1 */}
+              <StaggeredCard index={0}>
+                <div className="bg-[#f7f9fb] p-8 border border-[#E2E8F0] rounded-lg flex flex-col gap-6 h-full">
+                  <div className="flex text-[#0051d5]">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    ))}
+                  </div>
+                  <p className="text-[16px] leading-[24px] font-normal italic text-[#191c1e]">
+                    "The AI builder transformed my messy career history into a professional narrative. I secured three interviews within the first week of using my new resume."
+                  </p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <div className="w-12 h-12 rounded-full bg-[#e6e8ea] flex items-center justify-center font-bold text-black">JD</div>
+                    <div>
+                      <div className="text-[18px] leading-[28px] font-semibold text-black">James Davidson</div>
+                      <div className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">Product Manager at Meta</div>
+                    </div>
+                  </div>
+                </div>
+              </StaggeredCard>
+
+              {/* Testimonial 2 */}
+              <StaggeredCard index={1}>
+                <div className="bg-[#f7f9fb] p-8 border border-[#E2E8F0] rounded-lg flex flex-col gap-6 h-full">
+                  <div className="flex text-[#0051d5]">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    ))}
+                  </div>
+                  <p className="text-[16px] leading-[24px] font-normal italic text-[#191c1e]">
+                    "Finally, a resume builder that doesn't feel like a toy. The 'Executive Slate' design language is sophisticated and actually looks like high-end stationery."
+                  </p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <div className="w-12 h-12 rounded-full bg-[#e6e8ea] flex items-center justify-center font-bold text-black">SC</div>
+                    <div>
+                      <div className="text-[18px] leading-[28px] font-semibold text-black">Sarah Chen</div>
+                      <div className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">Senior Design Lead</div>
+                    </div>
+                  </div>
+                </div>
+              </StaggeredCard>
+
+              {/* Testimonial 3 */}
+              <StaggeredCard index={2}>
+                <div className="bg-[#f7f9fb] p-8 border border-[#E2E8F0] rounded-lg flex flex-col gap-6 h-full">
+                  <div className="flex text-[#0051d5]">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                    ))}
+                  </div>
+                  <p className="text-[16px] leading-[24px] font-normal italic text-[#191c1e]">
+                    "The ATS Score Checker is a game changer. I realized my previous resume was completely invisible to automated systems. This fixed it instantly."
+                  </p>
+                  <div className="flex items-center gap-4 mt-auto">
+                    <div className="w-12 h-12 rounded-full bg-[#e6e8ea] flex items-center justify-center font-bold text-black">MR</div>
+                    <div>
+                      <div className="text-[18px] leading-[28px] font-semibold text-black">Marcus Reed</div>
+                      <div className="text-[12px] leading-[16px] font-semibold tracking-[0.05em] text-[#45464d] uppercase">Full-Stack Engineer</div>
+                    </div>
+                  </div>
+                </div>
+              </StaggeredCard>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ─── PRICING SECTION ─── */}
+        <ScrollReveal>
+          <section className="py-24 bg-white px-4 md:px-16" id="pricing">
+            <div className="max-w-[1200px] mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.5 }}
+                className="text-center mb-16"
+              >
+                <span className="text-[12px] leading-[16px] font-semibold tracking-widest text-[#0051d5] uppercase block mb-4">
+                  Investment
+                </span>
+                <h2 className="font-['Source_Serif_4',serif] text-[32px] leading-[40px] font-bold text-black">
+                  Transparent Pricing
+                </h2>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-[900px] mx-auto">
+                {/* Free Plan */}
+                <StaggeredCard index={0}>
+                  <motion.div
+                    whileHover={{ y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="border border-[#E2E8F0] rounded-lg p-8 flex flex-col bg-[#f7f9fb] h-full"
+                  >
+                    <div className="mb-8">
+                      <h3 className="font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold text-black mb-2">Free</h3>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-['Source_Serif_4',serif] text-[48px] leading-[56px] font-bold tracking-[-0.02em] text-black">₹0</span>
+                        <span className="text-[14px] leading-[20px] text-[#45464d]">/forever</span>
+                      </div>
+                    </div>
+
+                    <ul className="space-y-4 mb-8 flex-grow">
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">1 Resume Download</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">3 Basic Templates</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">AI Content Support</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">PDF Export</span>
+                      </li>
+                    </ul>
+                    <button className="w-full border border-black text-black py-3 rounded-lg text-[18px] leading-[28px] font-semibold hover:bg-[#f2f4f6] transition-colors">
+                      Get Started Free
+                    </button>
+                  </motion.div>
+                </StaggeredCard>
+
+                {/* Pro Plan */}
+                <StaggeredCard index={1}>
+                  <motion.div
+                    whileHover={{ y: -10 }}
+                    transition={{ duration: 0.3 }}
+                    className="border-2 border-[#0051d5] rounded-lg p-8 flex flex-col relative bg-[#f7f9fb] shadow-lg h-full"
+                  >
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-[#0051d5] text-white px-4 py-1 rounded-full text-[12px] leading-[16px] font-semibold tracking-[0.05em] uppercase">
+                      Most Popular
+                    </div>
+                    <div className="mb-8">
+                      <h3 className="font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold text-black mb-2">Pro</h3>
+                      <div className="flex items-baseline gap-1">
+                        <span className="font-['Source_Serif_4',serif] text-[48px] leading-[56px] font-bold tracking-[-0.02em] text-black">₹199</span>
+                        <span className="text-[14px] leading-[20px] text-[#45464d]">/month</span>
+                      </div>
+                    </div>
+
+                    <ul className="space-y-4 mb-8 flex-grow">
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px] font-bold">Unlimited Resumes</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">All 10+ Premium Templates</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">Advanced AI Assistant</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">ATS Score &amp; Optimization</span>
+                      </li>
+                      <li className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-[#0051d5] text-[20px]">check</span>
+                        <span className="text-[14px] leading-[20px]">Priority Customer Support</span>
+                      </li>
+                    </ul>
+                    <button className="w-full bg-[#0F172A] text-white py-3 rounded-lg text-[18px] leading-[28px] font-semibold hover:bg-black transition-colors">
+                      Start Pro Journey
+                    </button>
+                  </motion.div>
+                </StaggeredCard>
+              </div>
+            </div>
+          </section>
+        </ScrollReveal>
+
+        {/* ─── FINAL CTA SECTION ─── */}
+        <ScrollReveal>
+          <section className="py-24 px-4 md:px-16 bg-[#0F172A] text-white text-center">
+            <div className="max-w-[800px] mx-auto flex flex-col items-center gap-8">
+              <motion.h2
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5 }}
+                className="font-['Source_Serif_4',serif] text-[48px] leading-[56px] font-bold tracking-[-0.02em]"
+              >
+                Build Your Future Career Today
+              </motion.h2>
+              <motion.p
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="text-[16px] leading-[24px] text-white/80"
+              >
+                Join 50,000+ professionals who have landed their dream jobs using Executive Slate. Start your professional journey now.
+              </motion.p>
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-white text-[#0F172A] px-10 py-4 rounded-lg font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold hover:bg-[#e6e8ea] transition-colors flex items-center gap-3"
+              >
+                <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>rocket_launch</span>
+                Build My Resume Now
+              </motion.button>
+            </div>
+          </section>
+        </ScrollReveal>
+
+      </main>
+
+      {/* ─── FOOTER ─── */}
+      <motion.footer
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5 }}
+        className="bg-black text-white w-full mt-auto"
+      >
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4 md:px-16 py-12 max-w-[1200px] mx-auto">
+          <div className="flex flex-col gap-4">
+            <div className="font-['Source_Serif_4',serif] text-[24px] leading-[32px] font-bold text-white">
+              Executive Slate
+            </div>
+            <p className="text-[14px] leading-[20px] text-white/80 max-w-[350px]">
+              The premium AI resume builder for ambitious professionals seeking clarity, authority, and success.
+            </p>
           </div>
-          <div style={{ fontSize: '13px' }}>© 2026 ResumeAI. Made with ❤️ in India</div>
-          <div style={{ display: 'flex', gap: '24px', fontSize: '13px' }}>
-            {['Privacy','Terms','Contact'].map(l => (
-              <a key={l} href="#" style={{ color: '#94a3b8', textDecoration: 'none', transition: 'color 0.2s' }}
-                onMouseEnter={e => e.target.style.color='#fff'}
-                onMouseLeave={e => e.target.style.color='#94a3b8'}>
-                {l}
-              </a>
-            ))}
+
+          <div className="flex flex-wrap gap-8 justify-start md:justify-end">
+            <a className="text-[14px] leading-[20px] text-white/80 hover:text-white hover:underline transition-all cursor-pointer" href="#">About Us</a>
+            <a className="text-[14px] leading-[20px] text-white/80 hover:text-white hover:underline transition-all cursor-pointer" href="#">Privacy Policy</a>
+            <a className="text-[14px] leading-[20px] text-white/80 hover:text-white hover:underline transition-all cursor-pointer" href="#">Terms of Service</a>
+            <a className="text-[14px] leading-[20px] text-white/80 hover:text-white hover:underline transition-all cursor-pointer" href="#">Help Center</a>
+            <a className="text-[14px] leading-[20px] text-white/80 hover:text-white hover:underline transition-all cursor-pointer" href="#">Contact</a>
           </div>
         </div>
-      </footer>
+
+        <div className="border-t border-white/10 py-6 px-4 md:px-16 text-center">
+          <p className="text-[14px] leading-[20px] text-white/60">© 2024 Executive Slate. All rights reserved.</p>
+        </div>
+      </motion.footer>
 
     </div>
   );
 }
 
+// ScrollReveal Component - Triggers animation when component comes into view
+function ScrollReveal({ children }) {
+  const controls = useAnimation();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  useEffect(() => {
+    if (isInView) {
+      controls.start("visible");
+    }
+  }, [controls, isInView]);
+
+  return (
+    <motion.div
+      ref={ref}
+      animate={controls}
+      initial="hidden"
+      transition={{ duration: 0.5 }}
+      variants={{
+        visible: { opacity: 1, y: 0 },
+        hidden: { opacity: 0, y: 50 }
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// StaggeredCard Component - Creates staggered animation for grid items
+function StaggeredCard({ children, index }) {
+  const controls = useAnimation();
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+
+  useEffect(() => {
+    if (isInView) {
+      controls.start("visible");
+    }
+  }, [controls, isInView]);
+
+  return (
+    <motion.div
+      ref={ref}
+      animate={controls}
+      initial="hidden"
+      custom={index}
+      variants={{
+        visible: (i) => ({
+          opacity: 1,
+          y: 0,
+          transition: {
+            delay: i * 0.1,
+            duration: 0.5,
+            ease: "easeOut"
+          }
+        }),
+        hidden: { opacity: 0, y: 30 }
+      }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+// Sub-component wrapper for modern layout design elements
 function ResumeSection({ title, children }) {
   return (
-    <div style={{ marginBottom: '10px' }}>
-      <div style={{ fontSize: '8px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px', color: '#2563eb', borderBottom: '1px solid #e5e7eb', paddingBottom: '3px', marginBottom: '6px' }}>{title}</div>
+    <div className="mb-2.5">
+      <div className="text-[8px] font-bold uppercase tracking-wider text-[#0051d5] border-b border-gray-200 pb-0.75 mb-1.5">
+        {title}
+      </div>
       {children}
     </div>
   );
+}
+
+// Internal Asset Pipeline Module to handle asset headers safely inside standard single file React deployments
+function CustomAssetInjector() {
+  useEffect(() => {
+    const linkId = "executive-slate-fonts-and-icons";
+    if (!document.getElementById(linkId)) {
+      const linkElement = document.createElement("link");
+      linkElement.id = linkId;
+      linkElement.rel = "stylesheet";
+      linkElement.href = "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:wght@600;700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap";
+      document.head.appendChild(linkElement);
+    }
+  }, []);
+  return null;
 }
