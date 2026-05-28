@@ -5,6 +5,8 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   plan: { type: String, default: 'free' },
+  resetPasswordToken: { type: String, default: null },
+  resetPasswordExpires: { type: Date, default: null },
 
   // ── Subscription fields ──────────────────────────────────────
   isPro: { type: Boolean, default: false },

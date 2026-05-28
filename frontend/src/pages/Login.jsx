@@ -192,9 +192,9 @@ export default function Login() {
                     Password
                   </label>
                   {!isSignup && (
-                    <a className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#64748B] hover:text-[#000000] transition-colors uppercase decoration-[#64748B] underline-offset-4 hover:underline" href="#">
+                    <Link className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#64748B] hover:text-[#000000] transition-colors uppercase decoration-[#64748B] underline-offset-4 hover:underline" to="/forgot-password">
                       Forgot Password?
-                    </a>
+                    </Link>
                   )}
                 </div>
                 <div className="relative">

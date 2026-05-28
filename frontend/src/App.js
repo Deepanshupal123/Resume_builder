@@ -13,6 +13,8 @@ import MyResumes    from './pages/MyResumes';
 import Templates    from './pages/Templates';
 import Analysis     from './pages/Analysis';
 import Settings     from './pages/Settings';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 // ✅ checks both 'user' and 'token' keys
 function ProtectedRoute({ children }) {
@@ -28,6 +30,8 @@ function App() {
         <Route path="/"        element={<LandingPage />} />
         <Route path="/login"   element={<Login />} />
         <Route path="/signup"  element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/pricing" element={<Pricing />} />
 
         {/* Protected */}
