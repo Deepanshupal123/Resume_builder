@@ -5,6 +5,8 @@ export default function ResetPassword() {
   const { token } = useParams();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -62,26 +64,46 @@ export default function ResetPassword() {
           <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             <div>
               <label className="mb-1 block text-sm font-semibold text-[#111827]">New Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-[#000000] bg-white px-4 py-3 text-sm text-[#191c1e] outline-none focus:border-[#111827]"
-                placeholder="At least 6 characters"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full border border-[#000000] bg-white px-4 py-3 pr-12 text-sm text-[#191c1e] outline-none focus:border-[#111827]"
+                  placeholder="At least 6 characters"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#000000]"
+                  aria-label="Toggle password visibility"
+                >
+                  <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
+              </div>
             </div>
 
             <div>
               <label className="mb-1 block text-sm font-semibold text-[#111827]">Confirm Password</label>
-              <input
-                type="password"
-                required
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full border border-[#000000] bg-white px-4 py-3 text-sm text-[#191c1e] outline-none focus:border-[#111827]"
-                placeholder="Repeat password"
-              />
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full border border-[#000000] bg-white px-4 py-3 pr-12 text-sm text-[#191c1e] outline-none focus:border-[#111827]"
+                  placeholder="Repeat password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#000000]"
+                  aria-label="Toggle confirm password visibility"
+                >
+                  <span className="material-symbols-outlined text-[20px]">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
+                </button>
+              </div>
             </div>
 
             <button
