@@ -133,7 +133,19 @@ export default function Builder() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50">
+      <style>{`
+        input, textarea, select {
+          color: #111827 !important;
+          -webkit-text-fill-color: #111827 !important;
+          background-color: #ffffff !important;
+          opacity: 1 !important;
+        }
+        input::placeholder, textarea::placeholder {
+          color: #9ca3af !important;
+          -webkit-text-fill-color: #9ca3af !important;
+        }
+      `}</style>
        {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
       <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
         <div className="flex items-center gap-3">
