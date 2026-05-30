@@ -283,7 +283,8 @@ Write 3 compelling paragraphs. Be specific, professional, and concise.`
               </div>
               <label className="text-xs text-gray-500 mb-1 block">Font Style</label>
               <select value={form.fontFamily} onChange={e => setForm({ ...form, fontFamily: e.target.value })}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                className="w-full rounded-lg border border-gray-200 bg-white text-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }}>
                 <option value="Arial, sans-serif">Modern Sans</option>
                 <option value="'Times New Roman', serif">Classic Serif</option>
                 <option value="Georgia, serif">Georgia</option>
@@ -306,7 +307,8 @@ Write 3 compelling paragraphs. Be specific, professional, and concise.`
                     <label className="text-xs text-gray-500">{f.label}</label>
                     <input name={f.name} value={form[f.name]} onChange={handleChange}
                       placeholder={f.placeholder}
-                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="mt-0.5 w-full rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }} />
                   </div>
                 ))}
               </div>
@@ -325,7 +327,8 @@ Write 3 compelling paragraphs. Be specific, professional, and concise.`
                     <label className="text-xs text-gray-500">{f.label}</label>
                     <input name={f.name} value={form[f.name]} onChange={handleChange}
                       placeholder={f.placeholder}
-                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      className="mt-0.5 w-full rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }} />
                   </div>
                 ))}
               </div>
@@ -339,25 +342,29 @@ Write 3 compelling paragraphs. Be specific, professional, and concise.`
                   <label className="text-xs text-gray-500">Your Skills</label>
                   <input name="mySkills" value={form.mySkills} onChange={handleChange}
                     placeholder="React, Node.js, Python..."
-                    className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="mt-0.5 w-full rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }} />
                 </div>
                 <div>
                   <label className="text-xs text-gray-500">Your Experience</label>
                   <input name="experience" value={form.experience} onChange={handleChange}
                     placeholder="2 years in web development..."
-                    className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="mt-0.5 w-full rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }} />
                 </div>
                 <div>
                   <label className="text-xs text-gray-500">Why This Company?</label>
                   <input name="whyCompany" value={form.whyCompany} onChange={handleChange}
                     placeholder="Love their product innovation..."
-                    className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="mt-0.5 w-full rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }} />
                 </div>
                 <div>
                   <label className="text-xs text-gray-500">Job Description (paste keywords)</label>
                   <textarea name="jobDescription" value={form.jobDescription} onChange={handleChange}
                     placeholder="Paste JD here for better AI match..." rows={3}
-                    className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    className="mt-0.5 w-full rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }} />
                 </div>
               </div>
               <button onClick={handleAIGenerate} disabled={aiGenerating}
@@ -372,7 +379,8 @@ Write 3 compelling paragraphs. Be specific, professional, and concise.`
               <textarea name="body" value={form.body} onChange={handleChange}
                 placeholder="Generate with AI or write manually here..."
                 rows={10}
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                className="w-full rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                style={{ backgroundColor: '#ffffff', color: '#111827', WebkitTextFillColor: '#111827' }} />
               {form.body && (
                 <button onClick={() => setForm({ ...form, body: '' })}
                   className="mt-1 text-xs text-red-400 hover:text-red-600">Clear</button>
