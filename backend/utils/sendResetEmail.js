@@ -45,7 +45,16 @@ const sendResetEmail = async (to, resetUrl) => {
 
   await transporter.sendMail(mailOptions);
 
-  return { ok: true, fallback: false };
+  try {
+    await transporter.sendMail(mailOptions);
+    return { ok: true, fallback: false };
+  } catch (err) {
+    console.log('sendResetEmail error:', err);
+    // Re-throw so calling route can handle/log it; include message for development
+    const e = new Error('Failed to send reset email: ' + err.message);
+    e.original = err;
+    throw e;
+  }
 };
 
 module.exports = { sendResetEmail };

@@ -136,6 +136,7 @@ router.post('/google', async (req, res) => {
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
+    console.log('Forgot-password request body:', req.body);
 
     if (!email) {
       return res.status(400).json({ message: 'Email is required.' });
@@ -152,7 +153,19 @@ router.post('/forgot-password', async (req, res) => {
     await user.save();
 
     const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${token}`;
-    const mailResult = await sendResetEmail(user.email, resetUrl);
+    let mailResult;
+    try {
+      mailResult = await sendResetEmail(user.email, resetUrl);
+    } catch (err) {
+      console.log('Error sending reset email (will fallback in development):', err);
+      if (process.env.NODE_ENV === 'development') {
+        return res.status(200).json({
+          message: 'Reset link generated in development mode (email failed).',
+          resetUrl,
+        });
+      }
+      throw err;
+    }
 
     return res.status(200).json({
       message: mailResult.fallback
@@ -161,8 +174,9 @@ router.post('/forgot-password', async (req, res) => {
       resetUrl: mailResult.resetUrl || null,
     });
   } catch (err) {
-    console.log('Forgot Password Error:', err.message);
-    return res.status(500).json({ message: 'Unable to process password reset request.' });
+    console.log('Forgot Password Error:', err);
+    const devMessage = process.env.NODE_ENV === 'development' ? `Unable to process password reset request: ${err.message}` : 'Unable to process password reset request.';
+    return res.status(500).json({ message: devMessage });
   }
 });
 
