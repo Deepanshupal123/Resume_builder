@@ -25,7 +25,7 @@ export default function Login() {
       if (!res.ok) return alert(data.message);
       localStorage.setItem('token', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      const redirectTo = location.state && location.state.from ? location.state.from : '/dashboard';
+      const redirectTo = location.state && location.state.from ? location.state.from : '/home';
       const after = location.state && location.state.after ? location.state.after : undefined;
       navigate(redirectTo, { state: after ? { after } : {} });
     } catch (err) {

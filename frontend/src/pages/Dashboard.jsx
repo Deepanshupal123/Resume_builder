@@ -29,11 +29,11 @@ export default function Dashboard() {
       <SectionHead title="Professional Summary" color="#111" borderColor="#111" />
       <div style={{ fontSize: 6.5, color: '#333', marginBottom: 8 }}>Results-driven Full Stack Developer with 3+ years building scalable web applications. Passionate about clean code and high-performance products.</div>
       <SectionHead title="Work Experience" color="#111" borderColor="#111" />
-      <ExpRow title="Software Developer" company="TechNova Solutions, Noida" date="2022–Present" color="#555" bullets={['Built RESTful APIs serving 50k+ daily users','React dashboards, 40% faster load time','AWS CI/CD pipeline integration']} />
+      <ExpRow title="Software Developer" company="TechNova Solutions, Noida" date="2022–Present" color="#555" bullets={['Built RESTful APIs serving 50k+ daily users', 'React dashboards, 40% faster load time', 'AWS CI/CD pipeline integration']} />
       <ExpRow title="Frontend Intern" company="WebCraft India, Remote" date="2021" color="#555" bullets={['Pixel-perfect React components from Figma']} />
       <SectionHead title="Skills" color="#111" borderColor="#111" />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 8 }}>
-        {['React.js','Node.js','MongoDB','Python','AWS','Docker'].map(s => <span key={s} style={{ border: '.7px solid #111', padding: '1px 5px', fontSize: 6, color: '#111' }}>{s}</span>)}
+        {['React.js', 'Node.js', 'MongoDB', 'Python', 'AWS', 'Docker'].map(s => <span key={s} style={{ border: '.7px solid #111', padding: '1px 5px', fontSize: 6, color: '#111' }}>{s}</span>)}
       </div>
       <SectionHead title="Education" color="#111" borderColor="#111" />
       <div style={{ fontSize: 7, fontWeight: 700, color: '#111' }}>B.Tech – Computer Science</div>
@@ -50,7 +50,7 @@ export default function Dashboard() {
         <div style={{ fontSize: 5.5, opacity: .85, marginBottom: 1 }}>+91 98765 43210</div>
         <div style={{ fontSize: 5.5, opacity: .75, marginBottom: 8 }}>Dehradun, UK</div>
         <div style={{ fontSize: 6, fontWeight: 700, textTransform: 'uppercase', borderBottom: '.5px solid rgba(255,255,255,.3)', paddingBottom: 2, marginBottom: 4 }}>Skills</div>
-        {['React.js','Node.js','MongoDB','Python','AWS','Docker'].map(s => <div key={s} style={{ background: 'rgba(255,255,255,.15)', padding: '1px 3px', borderRadius: 2, fontSize: 5.5, marginBottom: 2 }}>{s}</div>)}
+        {['React.js', 'Node.js', 'MongoDB', 'Python', 'AWS', 'Docker'].map(s => <div key={s} style={{ background: 'rgba(255,255,255,.15)', padding: '1px 3px', borderRadius: 2, fontSize: 5.5, marginBottom: 2 }}>{s}</div>)}
         <div style={{ fontSize: 6, fontWeight: 700, textTransform: 'uppercase', borderBottom: '.5px solid rgba(255,255,255,.3)', paddingBottom: 2, margin: '8px 0 4px' }}>Education</div>
         <div style={{ fontSize: 6, fontWeight: 700 }}>B.Tech CSE</div>
         <div style={{ fontSize: 5.5, opacity: .75 }}>COER Univ. 2022</div>
@@ -59,7 +59,7 @@ export default function Dashboard() {
         <div style={{ fontSize: 12, fontWeight: 700, color: '#1a73e8', marginBottom: 1 }}>Full Stack Developer</div>
         <div style={{ fontSize: 6, color: '#666', marginBottom: 7 }}>3+ years experience</div>
         <BlueSection title="Experience" />
-        <ExpRow title="Software Developer" company="TechNova Solutions" date="2022–Present" color="#1a73e8" bullets={['APIs for 50k+ daily users','40% faster React dashboards','AWS CI/CD pipelines']} />
+        <ExpRow title="Software Developer" company="TechNova Solutions" date="2022–Present" color="#1a73e8" bullets={['APIs for 50k+ daily users', '40% faster React dashboards', 'AWS CI/CD pipelines']} />
         <ExpRow title="Frontend Intern" company="WebCraft India" date="2021" color="#1a73e8" bullets={['Pixel-perfect React components']} />
       </div>
     </div>
@@ -76,10 +76,10 @@ export default function Dashboard() {
         <PurpleLabel title="About Me" /><div style={{ fontSize: 6.5, color: '#444', lineHeight: 1.55, marginBottom: 7 }}>Full Stack Developer with 3+ years experience. Passionate about clean code.</div>
         <PurpleLabel title="Skills" />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 7 }}>
-          {['React.js','Node.js','MongoDB','Python','AWS'].map(s => <span key={s} style={{ background: '#f3e8ff', color: '#7c3aed', padding: '1px 6px', borderRadius: 10, fontSize: 6 }}>{s}</span>)}
+          {['React.js', 'Node.js', 'MongoDB', 'Python', 'AWS'].map(s => <span key={s} style={{ background: '#f3e8ff', color: '#7c3aed', padding: '1px 6px', borderRadius: 10, fontSize: 6 }}>{s}</span>)}
         </div>
         <PurpleLabel title="Experience" />
-        <ExpRow title="Software Developer" company="TechNova Solutions" date="2022–Present" color="#7c3aed" bullets={['APIs for 50k+ users','40% faster React dashboards']} />
+        <ExpRow title="Software Developer" company="TechNova Solutions" date="2022–Present" color="#7c3aed" bullets={['APIs for 50k+ users', '40% faster React dashboards']} />
         <PurpleLabel title="Education" />
         <div style={{ fontSize: 7, fontWeight: 700, color: '#111' }}>B.Tech – CSE</div>
         <div style={{ fontSize: 6.5, color: '#666' }}>COER University • 2018–2022</div>
@@ -94,7 +94,7 @@ export default function Dashboard() {
       <div style={{ fontSize: 6.5, color: '#666', marginTop: 3, marginBottom: 8 }}>aryan@gmail.com • +91 98765 43210 • Dehradun</div>
       <div style={{ height: .5, background: '#e5e7eb', marginBottom: 7 }} />
       <GreenLabel title="Experience" />
-      <ExpRow title="Software Developer" company="TechNova Solutions, Noida" date="2022–Present" color="#059669" bullets={['APIs for 50k+ daily users','40% faster React dashboards','AWS CI/CD pipelines']} />
+      <ExpRow title="Software Developer" company="TechNova Solutions, Noida" date="2022–Present" color="#059669" bullets={['APIs for 50k+ daily users', '40% faster React dashboards', 'AWS CI/CD pipelines']} />
       <div style={{ height: .5, background: '#e5e7eb', margin: '7px 0' }} />
       <GreenLabel title="Skills" />
       <div style={{ fontSize: 6.5, color: '#444', marginBottom: 7 }}>React.js • Node.js • MongoDB • Python • AWS • Docker</div>
@@ -117,10 +117,10 @@ export default function Dashboard() {
         <div style={{ fontSize: 6.5, color: '#444', lineHeight: 1.55, marginBottom: 7 }}>Results-driven Full Stack Developer with 3+ years delivering scalable web solutions. Expert in React, Node.js, and AWS.</div>
         <GoldSection title="Core Competencies" />
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3, marginBottom: 7 }}>
-          {['React.js','Node.js','MongoDB','Python','AWS','Docker'].map(s => <span key={s} style={{ background: '#1e293b', color: '#f59e0b', padding: '1px 5px', fontSize: 6 }}>{s}</span>)}
+          {['React.js', 'Node.js', 'MongoDB', 'Python', 'AWS', 'Docker'].map(s => <span key={s} style={{ background: '#1e293b', color: '#f59e0b', padding: '1px 5px', fontSize: 6 }}>{s}</span>)}
         </div>
         <GoldSection title="Professional Experience" />
-        <ExpRow title="Software Developer" company="TechNova Solutions, Noida" date="2022–Present" color="#b45309" bullets={['Built APIs for 50k+ daily users','React dashboards 40% faster','AWS CI/CD pipelines']} />
+        <ExpRow title="Software Developer" company="TechNova Solutions, Noida" date="2022–Present" color="#b45309" bullets={['Built APIs for 50k+ daily users', 'React dashboards 40% faster', 'AWS CI/CD pipelines']} />
         <GoldSection title="Education" />
         <div style={{ fontSize: 7, fontWeight: 700, color: '#111' }}>B.Tech – Computer Science</div>
         <div style={{ fontSize: 6.5, color: '#666' }}>COER University • 2018–2022 • CGPA 8.4</div>
@@ -156,33 +156,33 @@ export default function Dashboard() {
   );
 
   const templates = [
-    { id: 'classic',   name: 'Classic',      sub: 'ATS-friendly',    Preview: ClassicCV },
-    { id: 'modern',    name: 'Modern Blue',   sub: 'Sidebar accent',  Preview: ModernBlueCV },
-    { id: 'creative',  name: 'Creative',      sub: 'Bold & colorful', Preview: CreativeCV },
-    { id: 'minimal',   name: 'Minimal',       sub: 'Clean & elegant', Preview: MinimalCV },
-    { id: 'executive', name: 'Executive',     sub: 'Premium dark',    Preview: ExecutiveCV },
+    { id: 'classic', name: 'Classic', sub: 'ATS-friendly', Preview: ClassicCV },
+    { id: 'modern', name: 'Modern Blue', sub: 'Sidebar accent', Preview: ModernBlueCV },
+    { id: 'creative', name: 'Creative', sub: 'Bold & colorful', Preview: CreativeCV },
+    { id: 'minimal', name: 'Minimal', sub: 'Clean & elegant', Preview: MinimalCV },
+    { id: 'executive', name: 'Executive', sub: 'Premium dark', Preview: ExecutiveCV },
   ];
 
   const stats = [
-    { icon: 'folder_open',  label: 'Total Resumes',    value: '12',     badge: '+2 this week', badgeColor: '#2ECC71', iconBg: 'rgba(160,202,255,.12)', iconColor: '#a0caff' },
-    { icon: 'leaderboard',  label: 'Avg. ATS Score',   value: '88',     suffix: '/100', badge: 'Top 5%', badgeColor: '#a0caff', iconBg: 'rgba(210,187,255,.12)', iconColor: '#d2bbff' },
-    { icon: 'download',     label: 'Downloads',        value: '34',     badge: '428 total', badgeColor: '#8a919e', iconBg: 'rgba(76,215,246,.12)', iconColor: '#4cd7f6' },
-    { icon: 'bolt',         label: 'Profile Strength', value: '78',     suffix: '%', badge: '', badgeColor: '', iconBg: 'rgba(46,204,113,.12)', iconColor: '#2ECC71', progress: 78 },
+    { icon: 'folder_open', label: 'Total Resumes', value: '12', badge: '+2 this week', badgeColor: '#2ECC71', iconBg: 'rgba(160,202,255,.12)', iconColor: '#a0caff' },
+    { icon: 'leaderboard', label: 'Avg. ATS Score', value: '88', suffix: '/100', badge: 'Top 5%', badgeColor: '#a0caff', iconBg: 'rgba(210,187,255,.12)', iconColor: '#d2bbff' },
+    { icon: 'download', label: 'Downloads', value: '34', badge: '428 total', badgeColor: '#8a919e', iconBg: 'rgba(76,215,246,.12)', iconColor: '#4cd7f6' },
+    { icon: 'bolt', label: 'Profile Strength', value: '78', suffix: '%', badge: '', badgeColor: '', iconBg: 'rgba(46,204,113,.12)', iconColor: '#2ECC71', progress: 78 },
   ];
 
   const buildTools = [
-    { icon: 'design_services', iconBg: 'rgba(160,202,255,.12)', iconColor: '#a0caff', title: 'Template Builder',      desc: 'Customize 50+ designer templates with our drag-and-drop editor.', linkColor: '#a0caff', linkText: 'Choose template', gradient: true, onClick: () => document.getElementById('templates').scrollIntoView({ behavior: 'smooth' }) },
-    { icon: 'auto_fix_high',   iconBg: 'rgba(210,187,255,.12)', iconColor: '#d2bbff', title: 'AI Resume Generator',   desc: 'Let AI write your experience and skills based on your dream role.',   linkColor: '#d2bbff', linkText: 'Generate with AI', gradient: true, onClick: () => navigate('/resume') },
-    { icon: 'mail',            iconBg: 'rgba(46,204,113,.12)',  iconColor: '#2ECC71', title: 'Cover Letter Gen',      desc: 'Generate personalized cover letters that match your resume tone.',   linkColor: '#2ECC71', linkText: 'Create letter', gradient: true, onClick: () => navigate('/cover-letter') },
-    { icon: 'shield',          iconBg: 'rgba(160,202,255,.12)', iconColor: '#a0caff', title: 'ATS Score Checker',     desc: 'Instantly scan for readability, formatting and keyword match.',       linkColor: '#a0caff', linkText: 'Check score', gradient: false, onClick: () => navigate('/ats-checker') },
-    { icon: 'analytics',       iconBg: 'rgba(210,187,255,.12)', iconColor: '#d2bbff', title: 'JD Match Analyzer',     desc: 'Compare your resume against any job posting for gaps.',                linkColor: '#d2bbff', linkText: 'Analyze match', gradient: false, onClick: () => navigate('/jd-match') },
-    { icon: 'verified',        iconBg: 'rgba(76,215,246,.12)',  iconColor: '#4cd7f6', title: 'Resume Score Card',     desc: 'Get deep AI feedback on content quality and impact.',                  linkColor: '#4cd7f6', linkText: 'Get score', gradient: false, onClick: () => navigate('/score') },
+    { icon: 'design_services', iconBg: 'rgba(160,202,255,.12)', iconColor: '#a0caff', title: 'Template Builder', desc: 'Customize 50+ designer templates with our drag-and-drop editor.', linkColor: '#a0caff', linkText: 'Choose template', gradient: true, onClick: () => document.getElementById('templates').scrollIntoView({ behavior: 'smooth' }) },
+    { icon: 'auto_fix_high', iconBg: 'rgba(210,187,255,.12)', iconColor: '#d2bbff', title: 'AI Resume Generator', desc: 'Let AI write your experience and skills based on your dream role.', linkColor: '#d2bbff', linkText: 'Generate with AI', gradient: true, onClick: () => navigate('/resume') },
+    { icon: 'mail', iconBg: 'rgba(46,204,113,.12)', iconColor: '#2ECC71', title: 'Cover Letter Gen', desc: 'Generate personalized cover letters that match your resume tone.', linkColor: '#2ECC71', linkText: 'Create letter', gradient: true, onClick: () => navigate('/cover-letter') },
+    { icon: 'shield', iconBg: 'rgba(160,202,255,.12)', iconColor: '#a0caff', title: 'ATS Score Checker', desc: 'Instantly scan for readability, formatting and keyword match.', linkColor: '#a0caff', linkText: 'Check score', gradient: false, onClick: () => navigate('/ats-checker') },
+    { icon: 'analytics', iconBg: 'rgba(210,187,255,.12)', iconColor: '#d2bbff', title: 'JD Match Analyzer', desc: 'Compare your resume against any job posting for gaps.', linkColor: '#d2bbff', linkText: 'Analyze match', gradient: false, onClick: () => navigate('/jd-match') },
+    { icon: 'verified', iconBg: 'rgba(76,215,246,.12)', iconColor: '#4cd7f6', title: 'Resume Score Card', desc: 'Get deep AI feedback on content quality and impact.', linkColor: '#4cd7f6', linkText: 'Get score', gradient: false, onClick: () => navigate('/score') },
   ];
 
   const recentResumes = [
     { title: 'Senior Product Designer – Apple', date: 'Oct 24, 2023', template: 'Minimalist Pro', score: 92, color: '#2ECC71', label: 'Excellent' },
-    { title: 'Full Stack Engineer – Stripe',    date: 'Oct 21, 2023', template: 'Modern Tech',    score: 84, color: '#a0caff', label: 'Very Good' },
-    { title: 'UI/UX Designer – Figma',          date: 'Oct 18, 2023', template: 'Creative',       score: 78, color: '#d2bbff', label: 'Good' },
+    { title: 'Full Stack Engineer – Stripe', date: 'Oct 21, 2023', template: 'Modern Tech', score: 84, color: '#a0caff', label: 'Very Good' },
+    { title: 'UI/UX Designer – Figma', date: 'Oct 18, 2023', template: 'Creative', score: 78, color: '#d2bbff', label: 'Good' },
   ];
 
   return (
@@ -197,11 +197,11 @@ export default function Dashboard() {
 
         <nav style={{ flex: 1, padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {[
-            { icon: 'dashboard',    label: 'Dashboard',   active: true,  path: '/dashboard' },
-            { icon: 'description',  label: 'My Resumes',  active: false, path: '/resumes' },
-            { icon: 'style',        label: 'Templates',   active: false, path: '/templates' },
-            { icon: 'psychology',   label: 'AI Analysis', active: false, path: '/analysis' },
-            { icon: 'settings',     label: 'Settings',    active: false, path: '/settings' },
+            { icon: 'dashboard', label: 'Dashboard', active: true, path: '/dashboard' },
+            { icon: 'description', label: 'My Resumes', active: false, path: '/resumes' },
+            { icon: 'style', label: 'Templates', active: false, path: '/templates' },
+            { icon: 'psychology', label: 'AI Analysis', active: false, path: '/analysis' },
+            { icon: 'settings', label: 'Settings', active: false, path: '/settings' },
           ].map((item) => (
             <div key={item.label}
               onClick={() => item.path && navigate(item.path)}
@@ -351,7 +351,7 @@ export default function Dashboard() {
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: 'rgba(255,255,255,.03)', borderBottom: '1px solid #404752' }}>
-                    {['Title','Date Modified','Template','Score','Actions'].map(h => (
+                    {['Title', 'Date Modified', 'Template', 'Score', 'Actions'].map(h => (
                       <th key={h} style={{ padding: '14px 20px', textAlign: 'left', fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '.06em', color: '#8a919e' }}>{h}</th>
                     ))}
                   </tr>
@@ -395,7 +395,7 @@ export default function Dashboard() {
                 <p style={{ fontSize: 13, color: '#8a919e' }}>Same form, different design — pick what suits you</p>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
-                {['chevron_left','chevron_right'].map(ic => (
+                {['chevron_left', 'chevron_right'].map(ic => (
                   <button key={ic} style={{ width: 36, height: 36, borderRadius: '50%', border: '1px solid #404752', background: 'none', color: '#8a919e', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span className="material-symbols-outlined" style={{ fontSize: 18 }}>{ic}</span>
                   </button>
