@@ -9,12 +9,12 @@ import CoverLetter from './pages/CoverLetter';
 import ATSChecker from './pages/ATSChecker';
 import JDMatch from './pages/JDMatch';
 import Pricing from './pages/Pricing';
-import MyResumes from './pages/MyResumes';
-import Templates from './pages/Templates';
-import Analysis from './pages/Analysis';
-import Settings from './pages/Settings';
 import Home from './pages/Home';
-
+import Template from './components/Templates/Template';
+import CheckoutPage from './components/Checkouth/CheckoutPage';
+import Analysis from './components/Analysis/Anslysis';
+import MyResume from './components/Myresume/Myresume';
+import Settings from './components/settings/Settings';
 // ✅ checks both 'user' and 'token' keys
 function ProtectedRoute({ children }) {
   const isLoggedIn = localStorage.getItem('user') || localStorage.getItem('token');
@@ -27,22 +27,21 @@ function App() {
       <Routes>
         {/* Public */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<CheckoutPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/pricing" element={<Pricing />} />
-
         {/* Protected */}
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/templates" element={<ProtectedRoute><Template /></ProtectedRoute>} />
         <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
         <Route path="/resume" element={<ProtectedRoute><ResumeForm /></ProtectedRoute>} />
         <Route path="/builder" element={<ProtectedRoute><Builder /></ProtectedRoute>} />
         <Route path="/cover-letter" element={<ProtectedRoute><CoverLetter /></ProtectedRoute>} />
         <Route path="/ats-checker" element={<ProtectedRoute><ATSChecker /></ProtectedRoute>} />
         <Route path="/jd-match" element={<ProtectedRoute><JDMatch /></ProtectedRoute>} />
-        <Route path="/resumes" element={<ProtectedRoute><MyResumes /></ProtectedRoute>} />
-        <Route path="/templates" element={<ProtectedRoute><Templates /></ProtectedRoute>} />
         <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/my-resumes" element={<ProtectedRoute><MyResume /></ProtectedRoute>} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
@@ -52,3 +51,4 @@ function App() {
 }
 
 export default App;
+

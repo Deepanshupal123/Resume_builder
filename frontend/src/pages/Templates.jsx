@@ -8,11 +8,11 @@ export default function Templates() {
   };
 
   const templates = [
-    { id: 'classic',   name: 'Classic',     sub: 'ATS-friendly',   color: '#a0caff' },
-    { id: 'modern',    name: 'Modern Blue',  sub: 'Sidebar accent', color: '#4F46E5' },
-    { id: 'creative',  name: 'Creative',     sub: 'Bold & colorful',color: '#d2bbff' },
-    { id: 'minimal',   name: 'Minimal',      sub: 'Clean & elegant',color: '#2ECC71' },
-    { id: 'executive', name: 'Executive',    sub: 'Premium dark',   color: '#f59e0b' },
+    { id: 'classic', name: 'Classic', sub: 'ATS-friendly', color: '#a0caff' },
+    { id: 'modern', name: 'Modern Blue', sub: 'Sidebar accent', color: '#4F46E5' },
+    { id: 'creative', name: 'Creative', sub: 'Bold & colorful', color: '#d2bbff' },
+    { id: 'minimal', name: 'Minimal', sub: 'Clean & elegant', color: '#2ECC71' },
+    { id: 'executive', name: 'Executive', sub: 'Premium dark', color: '#f59e0b' },
   ];
 
   return (
