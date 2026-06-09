@@ -41,6 +41,14 @@ export default function Builder() {
   const isPro = user.isPro === true;
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const photoRef = useRef();
+  
+  // Tab and Layout states
+  const [activeTab, setActiveTab] = useState('style');
+  const [layoutMode, setLayoutMode] = useState('split'); // 'split', 'editor', 'preview'
+  const [expandedExperienceIndex, setExpandedExperienceIndex] = useState(0);
+  const [expandedEducationIndex, setExpandedEducationIndex] = useState(0);
+  const [templateCategory, setTemplateCategory] = useState('all'); // 'all', 'free', 'pro'
+  const [templateSearch, setTemplateSearch] = useState('');
 
   const [form, setForm] = useState({
     name: user.name || '',
@@ -98,14 +106,16 @@ export default function Builder() {
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
     html2pdf().set(opt).from(element).save();
-  };const handleTemplateSelect = (t) => {
-  if (!t.free && !isPro) {
-    setShowUpgradeModal(true);
-    return;
-  }
-  setActiveTemplate(t.id);
-  localStorage.setItem('selectedTemplate', t.id);
-};
+  };
+
+  const handleTemplateSelect = (t) => {
+    if (!t.free && !isPro) {
+      setShowUpgradeModal(true);
+      return;
+    }
+    setActiveTemplate(t.id);
+    localStorage.setItem('selectedTemplate', t.id);
+  };
 
   const renderPreview = () => {
     switch (activeTemplate) {
@@ -132,308 +142,798 @@ export default function Builder() {
     }
   };
 
+  // Compute profile completion percentage
+  const computeCompletion = () => {
+    let filled = 0;
+    let total = 6;
+    if (form.name?.trim()) filled++;
+    if (form.email?.trim()) filled++;
+    if (form.phone?.trim()) filled++;
+    if (form.experiences?.some(e => e.jobTitle?.trim())) filled++;
+    if (form.educations?.some(e => e.degree?.trim())) filled++;
+    if (form.skills?.trim()) filled++;
+    return Math.round((filled / total) * 100);
+  };
+
+  // Filter templates list based on search and category inputs
+  const filteredTemplates = templates.filter(t => {
+    const matchesSearch = t.name.toLowerCase().includes(templateSearch.toLowerCase());
+    if (templateCategory === 'free') return matchesSearch && t.free;
+    if (templateCategory === 'pro') return matchesSearch && !t.free;
+    return matchesSearch;
+  });
+
+  // Define tab navigation buttons with high-quality custom SVGs
+  const tabs = [
+    {
+      id: 'style',
+      label: 'Design',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="9" y1="3" x2="9" y2="21" />
+          <line x1="9" y1="9" x2="21" y2="9" />
+        </svg>
+      )
+    },
+    {
+      id: 'personal',
+      label: 'Profile',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      )
+    },
+    {
+      id: 'experience',
+      label: 'Work',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+        </svg>
+      )
+    },
+    {
+      id: 'education',
+      label: 'Education',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+          <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" />
+        </svg>
+      )
+    },
+    {
+      id: 'skills',
+      label: 'Skills &+',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg>
+      )
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard')} className="text-gray-400 hover:text-gray-600 text-sm">← Back</button>
+    <div className="h-screen bg-slate-50 flex flex-col font-sans overflow-hidden">
+      <style>{`
+        html, body {
+          overflow: hidden;
+          height: 100%;
+          margin: 0;
+        }
+        input, textarea, select {
+          color: #1e293b !important;
+          -webkit-text-fill-color: #1e293b !important;
+          background-color: #ffffff !important;
+          opacity: 1 !important;
+        }
+        input::placeholder, textarea::placeholder {
+          color: #94a3b8 !important;
+          -webkit-text-fill-color: #94a3b8 !important;
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.25s ease-out forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(4px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      
+      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+      
+      {/* Visual Glassmorphic Top Bar Header */}
+      <div className="backdrop-blur-md bg-white/95 border-b border-slate-100 px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm shadow-slate-100/50">
+        <div className="flex items-center gap-4">
+          <button onClick={() => navigate('/dashboard')} className="text-slate-400 hover:text-slate-700 flex items-center gap-1 text-xs font-semibold bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all active:scale-95">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+            </svg>
+            Back
+          </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">R</span>
+            <div className="w-8 h-8 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/20">
+              <span className="text-white text-sm font-black tracking-wider">R</span>
             </div>
-            <span className="font-semibold text-gray-800">ResumeAI</span>
+            <span className="font-extrabold text-slate-800 text-lg tracking-tight">Resume<span className="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded-md ml-0.5 font-bold">AI</span></span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          {isPro
-    ? <span style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: '#fff', borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 700 }}>💎 Pro</span>
-    : <button onClick={() => navigate('/pricing')} style={{ background: '#fef3c7', color: '#92400e', border: '1px solid #fcd34d', borderRadius: 20, padding: '3px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>⭐ Upgrade to Pro</button>
-  }
-          <button onClick={handleDownloadPDF} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
-            Download PDF ⬇
+        
+        {/* Workspace Layout Mode Toggles */}
+        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-0.5 shadow-sm">
+          {[
+            { id: 'split', label: 'Split Screen', icon: (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <path d="M12 3v18" />
+              </svg>
+            )},
+            { id: 'editor', label: 'Editor Focus', icon: (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z" />
+              </svg>
+            )},
+            { id: 'preview', label: 'Preview Focus', icon: (
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
+                <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            )}
+          ].map(m => (
+            <button key={m.id} onClick={() => setLayoutMode(m.id)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${layoutMode === m.id ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              {m.icon}
+              <span className="hidden md:inline">{m.label}</span>
+            </button>
+          ))}
+        </div>
+        
+        <div className="flex items-center gap-4">
+          {isPro ? (
+            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-full px-4 py-1.5 text-xs font-bold shadow-md shadow-indigo-600/10 flex items-center gap-1 animate-pulse">
+              💎 Premium Pro
+            </span>
+          ) : (
+            <button onClick={() => navigate('/pricing')} className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-full px-4 py-1.5 text-xs font-bold transition-all shadow-sm active:scale-95 flex items-center gap-1.5">
+              ⭐ Upgrade to Pro
+            </button>
+          )}
+          
+          <button onClick={handleDownloadPDF} className="bg-indigo-600 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/10 transition-all flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            Download PDF
           </button>
-          <span className="text-sm text-gray-500">Hi, {user.name || 'User'} 👋</span>
-          <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-600">Logout</button>
+          
+          <span className="text-xs text-slate-500 font-semibold bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 flex items-center gap-1.5">
+            Hi, <span className="text-slate-800 font-bold">{user.name || 'User'}</span> 👋
+          </span>
+          
+          <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-all font-bold">
+            Logout
+          </button>
         </div>
       </div>
 
-      <div className="flex" style={{ height: 'calc(100vh - 52px)' }}>
-        <div className="w-96 bg-white border-r border-gray-100 overflow-y-auto flex-shrink-0">
-          <div className="p-5 space-y-6">
-
-            <div>
-              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Template (20+)</h2>
-              <div className="flex flex-wrap gap-2">
-                {templates.map(t => (
-                  <button key={t.id} onClick={() => handleTemplateSelect(t)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition ${activeTemplate === t.id ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-300'}`}>
-                    {t.name}
-                  </button>
-                ))}
-              </div>
+      {/* Editor Body Grid */}
+      <div className="flex flex-1 overflow-hidden" style={{ height: 'calc(100vh - 61px)' }}>
+        
+        {/* Modern Tabbed Sidebar (Expands when layout mode is Editor Focus) */}
+        {layoutMode !== 'preview' && (
+          <div className={`bg-white border-r border-slate-150 flex-shrink-0 flex overflow-hidden transition-all duration-300 ${layoutMode === 'editor' ? 'flex-1' : 'w-[420px]'}`}>
+            
+            {/* Left Vertical Icon Menu (70px) */}
+            <div className="w-[70px] bg-slate-900 flex flex-col items-center py-5 gap-3 flex-shrink-0 overflow-y-auto h-full no-scrollbar">
+              {tabs.map(t => (
+                <button key={t.id} onClick={() => setActiveTab(t.id)}
+                  className={`w-[54px] h-[54px] flex flex-col items-center justify-center gap-1 rounded-2xl relative transition-all active:scale-90 ${activeTab === t.id ? 'text-indigo-400 bg-slate-800/80 shadow-inner' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'}`}
+                >
+                  {activeTab === t.id && (
+                    <div className="absolute left-0 top-3 bottom-3 w-1 bg-indigo-500 rounded-r" />
+                  )}
+                  {t.icon}
+                  <span className="text-[9px] font-extrabold uppercase tracking-wider">{t.label}</span>
+                </button>
+              ))}
             </div>
 
-            <div>
-              <h2 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">🎨 Customize</h2>
-              <div className="mb-3">
-                <label className="text-xs text-gray-500 mb-2 block">Accent Color</label>
-                <div className="flex gap-2 flex-wrap">
-                  {[
-                    { color: '#1d4ed8', name: 'Blue' },
-                    { color: '#7c3aed', name: 'Purple' },
-                    { color: '#059669', name: 'Green' },
-                    { color: '#dc2626', name: 'Red' },
-                    { color: '#d97706', name: 'Orange' },
-                    { color: '#0f172a', name: 'Black' },
-                    { color: '#0891b2', name: 'Cyan' },
-                    { color: '#be185d', name: 'Pink' },
-                  ].map(c => (
-                    <button key={c.color}
-                      onClick={() => setForm({ ...form, accentColor: c.color })}
-                      title={c.name}
-                      style={{ background: c.color }}
-                      className={`w-7 h-7 rounded-full border-2 transition ${form.accentColor === c.color ? 'border-gray-800 scale-110' : 'border-transparent'}`}
-                    />
-                  ))}
+            {/* Right Active Form Pane (Fills the rest of the sidebar) */}
+            <div className={`flex-1 overflow-y-auto p-5 space-y-6 bg-white ${layoutMode === 'editor' ? 'max-w-2xl mx-auto' : ''}`}>
+              
+              {/* Dynamic Resume Completion Meter */}
+              <div className="bg-slate-50 border border-slate-150 p-4.5 rounded-2xl shadow-sm">
+                <div className="flex justify-between items-center mb-1.5">
+                  <span className="text-[10px] font-extrabold text-slate-700 uppercase tracking-widest flex items-center gap-1">
+                    📋 Profile Completion
+                  </span>
+                  <span className="text-xs font-black text-indigo-650 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">
+                    {computeCompletion()}% Complete
+                  </span>
+                </div>
+                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden shadow-inner">
+                  <div className="bg-indigo-600 h-full rounded-full transition-all duration-500"
+                    style={{ width: `${computeCompletion()}%` }} />
                 </div>
               </div>
-              <div className="mb-3">
-                <label className="text-xs text-gray-500 mb-1 block">Font Style</label>
-                <select value={form.fontFamily} onChange={e => setForm({ ...form, fontFamily: e.target.value })}
-                  className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="'Times New Roman', serif">Classic Serif</option>
-                  <option value="Arial, sans-serif">Modern Sans</option>
-                  <option value="Georgia, serif">Georgia</option>
-                  <option value="'Helvetica Neue', sans-serif">Helvetica</option>
-                  <option value="'Courier New', monospace">Courier (Tech)</option>
-                  <option value="Garamond, serif">Garamond</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs text-gray-500 mb-1 block">Font Size: {form.fontSize}px</label>
-                <input type="range" min="10" max="14" step="0.5"
-                  value={form.fontSize}
-                  onChange={e => setForm({ ...form, fontSize: parseFloat(e.target.value) })}
-                  className="w-full accent-blue-600" />
-                <div className="flex justify-between text-xs text-gray-400 mt-1">
-                  <span>Small</span><span>Medium</span><span>Large</span>
-                </div>
-              </div>
-            </div>
 
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">📸 Profile Photo</h3>
-              <div className="flex items-center gap-4">
-                {form.photo
-                  ? <img src={form.photo} alt="profile" className="w-16 h-16 rounded-full object-cover border-2 border-blue-200" />
-                  : <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-2xl border-2 border-dashed border-gray-300">👤</div>
-                }
-                <div>
-                  <button onClick={() => photoRef.current.click()}
-                    className="text-sm bg-blue-50 text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-100 font-medium">
-                    Upload Photo
-                  </button>
-                  {form.photo && <button onClick={() => setForm({ ...form, photo: null })} className="ml-2 text-xs text-red-400 hover:text-red-600">Remove</button>}
-                  <input ref={photoRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
-                  <p className="text-xs text-gray-400 mt-1">JPG, PNG — max 2MB</p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">👤 Personal Info</h3>
-              <div className="space-y-2">
-                {[
-                  { name: 'name', label: 'Full Name', placeholder: 'John Smith' },
-                  { name: 'email', label: 'Email', placeholder: 'john@email.com' },
-                  { name: 'phone', label: 'Phone', placeholder: '+91 98765 43210' },
-                  { name: 'location', label: 'Location', placeholder: 'Delhi, India' },
-                  { name: 'linkedin', label: 'LinkedIn', placeholder: 'linkedin.com/in/john' },
-                  { name: 'website', label: 'Website/Portfolio', placeholder: 'johndoe.com' },
-                ].map(f => (
-                  <div key={f.name}>
-                    <label className="text-xs text-gray-500">{f.label}</label>
-                    <input name={f.name} value={form[f.name]} onChange={handleChange}
-                      placeholder={f.placeholder}
-                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                ))}
-                <div>
-                  <label className="text-xs text-gray-500">Professional Summary</label>
-                  <textarea name="summary" value={form.summary} onChange={handleChange}
-                    placeholder="Experienced developer with 3+ years..." rows={3}
-                    className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">🛠 Skills</h3>
-              <input name="skills" value={form.skills} onChange={handleChange}
-                placeholder="React, Node.js, Python, MongoDB, AWS"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              <p className="text-xs text-gray-400 mt-1">Separate using commas</p>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">💼 Work Experience</h3>
-              {form.experiences.map((exp, i) => (
-                <div key={i} className="border border-gray-100 rounded-xl p-3 mb-3 bg-gray-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-gray-600">Experience {i + 1}</span>
-                    {form.experiences.length > 1 && <button onClick={() => removeItem('experiences', i)} className="text-xs text-red-400 hover:text-red-600">Remove</button>}
-                  </div>
-                  {[
-                    { key: 'jobTitle', placeholder: 'Software Developer', label: 'Job Title' },
-                    { key: 'company', placeholder: 'Company Name', label: 'Company' },
-                    { key: 'years', placeholder: 'Jan 2023 - Present', label: 'Duration' },
-                  ].map(f => (
-                    <div key={f.key} className="mb-2">
-                      <label className="text-xs text-gray-500">{f.label}</label>
-                      <input value={exp[f.key]} onChange={e => handleArrayChange('experiences', i, f.key, e.target.value)}
-                        placeholder={f.placeholder}
-                        className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                  ))}
+              {/* Tab: Appearance & Styling */}
+              {activeTab === 'style' && (
+                <div className="space-y-6 animate-fadeIn">
                   <div>
-                    <label className="text-xs text-gray-500">Description</label>
-                    <textarea value={exp.jobDesc} onChange={e => handleArrayChange('experiences', i, 'jobDesc', e.target.value)}
-                      placeholder="- Built React dashboard&#10;- Integrated REST APIs" rows={3}
-                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3">Templates</h3>
+                    
+                    {/* Category Filter and Search */}
+                    <div className="space-y-2 mb-4">
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                          </svg>
+                        </span>
+                        <input type="text" placeholder="Search templates..." value={templateSearch} onChange={e => setTemplateSearch(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white" />
+                      </div>
+                      
+                      <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-[10px]">
+                        {[
+                          { id: 'all', label: 'All' },
+                          { id: 'free', label: 'Free' },
+                          { id: 'pro', label: 'Premium' }
+                        ].map(cat => (
+                          <button key={cat.id} type="button" onClick={() => setTemplateCategory(cat.id)}
+                            className={`flex-1 py-1 rounded-lg font-extrabold transition-all ${templateCategory === cat.id ? 'bg-white text-slate-800 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}>
+                            {cat.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 max-h-[220px] overflow-y-auto pr-1">
+                      {filteredTemplates.length > 0 ? (
+                        filteredTemplates.map(t => (
+                          <button key={t.id} onClick={() => handleTemplateSelect(t)}
+                            className={`p-3 rounded-2xl text-left border text-xs font-bold transition-all relative flex flex-col justify-between h-[76px] shadow-sm ${activeTemplate === t.id ? 'bg-indigo-50 border-indigo-600 text-indigo-900 ring-2 ring-indigo-600/10' : 'bg-white border-slate-200 text-slate-700 hover:border-indigo-300 hover:bg-slate-50'}`}>
+                            <span>{t.name}</span>
+                            {!t.free && <span className="absolute top-2 right-2 text-[8px] bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold px-1.5 py-0.5 rounded-full tracking-wide">PRO</span>}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="col-span-2 text-center py-6 text-xs text-slate-400 font-semibold">
+                          No matching templates.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-100 pt-5">
+                    <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-4">🎨 Typography & Colors</h3>
+                    
+                    <div className="mb-4">
+                      <label className="text-xs font-bold text-slate-500 mb-2 block">Accent Theme Color</label>
+                      <div className="flex gap-2 flex-wrap">
+                        {[
+                          { color: '#1d4ed8', name: 'Blue' },
+                          { color: '#7c3aed', name: 'Purple' },
+                          { color: '#059669', name: 'Green' },
+                          { color: '#dc2626', name: 'Red' },
+                          { color: '#d97706', name: 'Orange' },
+                          { color: '#0f172a', name: 'Black' },
+                          { color: '#0891b2', name: 'Cyan' },
+                          { color: '#be185d', name: 'Pink' },
+                        ].map(c => (
+                          <button key={c.color}
+                            onClick={() => setForm({ ...form, accentColor: c.color })}
+                            title={c.name}
+                            style={{ background: c.color }}
+                            className={`w-8 h-8 rounded-full border-2 transition-all flex items-center justify-center cursor-pointer relative shadow-sm ${form.accentColor === c.color ? 'border-slate-800 scale-110 ring-4 ring-indigo-500/20' : 'border-transparent hover:scale-105'}`}
+                          >
+                            {form.accentColor === c.color && (
+                              <svg className="w-4 h-4 text-white drop-shadow-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="text-xs font-bold text-slate-500 mb-1.5 block">Font Typography</label>
+                      <select value={form.fontFamily} onChange={e => setForm({ ...form, fontFamily: e.target.value })}
+                        className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all font-semibold bg-white shadow-sm">
+                        <option value="'Times New Roman', serif">Classic Serif</option>
+                        <option value="Arial, sans-serif">Modern Sans</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Helvetica Neue', sans-serif">Helvetica</option>
+                        <option value="'Courier New', monospace">Courier (Tech)</option>
+                        <option value="Garamond, serif">Garamond</option>
+                      </select>
+                    </div>
+
+                    <div className="mb-4">
+                      <label className="text-xs font-bold text-slate-500 mb-1 block flex justify-between">
+                        <span>Font Size</span>
+                        <span className="text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded font-black">{form.fontSize}px</span>
+                      </label>
+                      <input type="range" min="10" max="14" step="0.5"
+                        value={form.fontSize}
+                        onChange={e => setForm({ ...form, fontSize: parseFloat(e.target.value) })}
+                        className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+                      <div className="flex justify-between text-[10px] text-slate-400 font-extrabold uppercase mt-1">
+                        <span>Small</span><span>Medium</span><span>Large</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Wizard Footer */}
+                  <div className="border-t border-slate-100 pt-4 flex justify-end">
+                    <button type="button" onClick={() => setActiveTab('personal')}
+                      className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                    >
+                      Next: Profile
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
-              ))}
-              <button onClick={() => addItem('experiences', emptyExp)}
-                className="w-full text-sm text-blue-600 border border-dashed border-blue-300 rounded-lg py-2 hover:bg-blue-50">
-                + Add Experience
-              </button>
-            </div>
+              )}
 
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">🎓 Education</h3>
-              {form.educations.map((edu, i) => (
-                <div key={i} className="border border-gray-100 rounded-xl p-3 mb-3 bg-gray-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-gray-600">Education {i + 1}</span>
-                    {form.educations.length > 1 && <button onClick={() => removeItem('educations', i)} className="text-xs text-red-400 hover:text-red-600">Remove</button>}
-                  </div>
-                  {[
-                    { key: 'degree', placeholder: 'B.Tech Computer Science', label: 'Degree' },
-                    { key: 'college', placeholder: 'COER University', label: 'College/University' },
-                    { key: 'gradYear', placeholder: '2025', label: 'Year' },
-                  ].map(f => (
-                    <div key={f.key} className="mb-2">
-                      <label className="text-xs text-gray-500">{f.label}</label>
-                      <input value={edu[f.key]} onChange={e => handleArrayChange('educations', i, f.key, e.target.value)}
-                        placeholder={f.placeholder}
-                        className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                  ))}
-                </div>
-              ))}
-              <button onClick={() => addItem('educations', emptyEdu)}
-                className="w-full text-sm text-blue-600 border border-dashed border-blue-300 rounded-lg py-2 hover:bg-blue-50">
-                + Add Education
-              </button>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">🚀 Projects</h3>
-              {form.projects.map((proj, i) => (
-                <div key={i} className="border border-gray-100 rounded-xl p-3 mb-3 bg-gray-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-gray-600">Project {i + 1}</span>
-                    {form.projects.length > 1 && <button onClick={() => removeItem('projects', i)} className="text-xs text-red-400 hover:text-red-600">Remove</button>}
-                  </div>
-                  {[
-                    { key: 'name', placeholder: 'ResumeAI', label: 'Project Name' },
-                    { key: 'tech', placeholder: 'React, Node.js, MongoDB', label: 'Technologies' },
-                  ].map(f => (
-                    <div key={f.key} className="mb-2">
-                      <label className="text-xs text-gray-500">{f.label}</label>
-                      <input value={proj[f.key]} onChange={e => handleArrayChange('projects', i, f.key, e.target.value)}
-                        placeholder={f.placeholder}
-                        className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    </div>
-                  ))}
+              {/* Tab: Personal Info */}
+              {activeTab === 'personal' && (
+                <div className="space-y-5 animate-fadeIn">
                   <div>
-                    <label className="text-xs text-gray-500">Description</label>
-                    <textarea value={proj.desc} onChange={e => handleArrayChange('projects', i, 'desc', e.target.value)}
-                      placeholder="AI-powered resume builder..." rows={2}
-                      className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  </div>
-                </div>
-              ))}
-              <button onClick={() => addItem('projects', emptyProject)}
-                className="w-full text-sm text-blue-600 border border-dashed border-blue-300 rounded-lg py-2 hover:bg-blue-50">
-                + Add Project
-              </button>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">🏆 Certifications</h3>
-              {form.certifications.map((cert, i) => (
-                <div key={i} className="border border-gray-100 rounded-xl p-3 mb-3 bg-gray-50">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-gray-600">Certification {i + 1}</span>
-                    {form.certifications.length > 1 && <button onClick={() => removeItem('certifications', i)} className="text-xs text-red-400 hover:text-red-600">Remove</button>}
-                  </div>
-                  {[
-                    { key: 'name', placeholder: 'AWS Solutions Architect', label: 'Certificate Name' },
-                    { key: 'issuer', placeholder: 'Amazon Web Services', label: 'Issuer' },
-                    { key: 'year', placeholder: '2024', label: 'Year' },
-                  ].map(f => (
-                    <div key={f.key} className="mb-2">
-                      <label className="text-xs text-gray-500">{f.label}</label>
-                      <input value={cert[f.key]} onChange={e => handleArrayChange('certifications', i, f.key, e.target.value)}
-                        placeholder={f.placeholder}
-                        className="mt-0.5 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest mb-3">📸 Profile Photo</h3>
+                    <div className="flex items-center gap-4 p-4 bg-slate-50/60 rounded-2xl border border-slate-100 shadow-sm">
+                      <div className="relative group flex-shrink-0">
+                        {form.photo ? (
+                          <img src={form.photo} alt="profile" className="w-20 h-20 rounded-full object-cover border-4 border-white shadow-md transition-all" />
+                        ) : (
+                          <div className="w-20 h-20 rounded-full bg-slate-100 border-2 border-dashed border-slate-350 flex items-center justify-center text-slate-400 text-3xl shadow-inner font-light">
+                            👤
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <button onClick={() => photoRef.current.click()}
+                          className="text-xs bg-indigo-600 text-white px-3.5 py-2 rounded-xl hover:bg-indigo-700 active:scale-95 transition-all font-bold shadow-sm inline-flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                          </svg>
+                          Upload Photo
+                        </button>
+                        {form.photo && (
+                          <button onClick={() => setForm({ ...form, photo: null })} className="ml-2 text-xs bg-white border border-red-200 text-red-600 px-3.5 py-2 rounded-xl hover:bg-red-50 transition-all font-bold shadow-sm">
+                            Remove
+                          </button>
+                        )}
+                        <input ref={photoRef} type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
+                        <p className="text-[10px] text-slate-400 mt-2 font-medium">JPG, PNG — Max 2MB</p>
+                      </div>
                     </div>
-                  ))}
+                  </div>
+
+                  <div className="border-t border-slate-100 pt-4 space-y-4">
+                    <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">👤 Contact & Summary</h3>
+                    {[
+                      { name: 'name', label: 'Full Name', placeholder: 'John Smith' },
+                      { name: 'email', label: 'Email Address', placeholder: 'john@email.com' },
+                      { name: 'phone', label: 'Phone Number', placeholder: '+91 98765 43210' },
+                      { name: 'location', label: 'Location', placeholder: 'Delhi, India' },
+                      { name: 'linkedin', label: 'LinkedIn Profile', placeholder: 'linkedin.com/in/john' },
+                      { name: 'website', label: 'Portfolio Website', placeholder: 'johndoe.com' },
+                    ].map(f => (
+                      <div key={f.name}>
+                        <label className="text-[11px] font-bold text-slate-500 mb-1 block">{f.label}</label>
+                        <input name={f.name} value={form[f.name]} onChange={handleChange}
+                          placeholder={f.placeholder}
+                          className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white" />
+                      </div>
+                    ))}
+                    <div>
+                      <label className="text-[11px] font-bold text-slate-500 mb-1 block">Professional Summary</label>
+                      <textarea name="summary" value={form.summary} onChange={handleChange}
+                        placeholder="Experienced developer with 3+ years..." rows={4}
+                        className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white" />
+                    </div>
+                  </div>
+
+                  {/* Wizard Footer */}
+                  <div className="border-t border-slate-100 pt-4 flex justify-between">
+                    <button type="button" onClick={() => setActiveTab('style')}
+                      className="border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                      Back
+                    </button>
+                    <button type="button" onClick={() => setActiveTab('experience')}
+                      className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                    >
+                      Next: Work History
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              ))}
-              <button onClick={() => addItem('certifications', emptyCert)}
-                className="w-full text-sm text-blue-600 border border-dashed border-blue-300 rounded-lg py-2 hover:bg-blue-50">
-                + Add Certification
-              </button>
-            </div>
+              )}
 
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">🌐 Languages</h3>
-              {form.languages.map((lang, i) => (
-                <div key={i} className="flex gap-2 mb-2 items-center">
-                  <input value={lang.language} onChange={e => handleArrayChange('languages', i, 'language', e.target.value)}
-                    placeholder="English"
-                    className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                  <select value={lang.level} onChange={e => handleArrayChange('languages', i, 'level', e.target.value)}
-                    className="rounded-lg border border-gray-200 px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    {['Native', 'Fluent', 'Advanced', 'Intermediate', 'Basic'].map(l => <option key={l}>{l}</option>)}
-                  </select>
-                  {form.languages.length > 1 && <button onClick={() => removeItem('languages', i)} className="text-red-400 hover:text-red-600 text-lg">×</button>}
+              {/* Tab: Work Experience */}
+              {activeTab === 'experience' && (
+                <div className="space-y-5 animate-fadeIn">
+                  <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">💼 Work History</h3>
+                  
+                  <div className="space-y-4">
+                    {form.experiences.map((exp, i) => {
+                      const isExpanded = expandedExperienceIndex === i;
+                      return (
+                        <div key={i} className="border border-slate-150 rounded-2xl bg-slate-50/50 shadow-sm overflow-hidden hover:border-slate-200 transition-all">
+                          {/* Accordion Header */}
+                          <div onClick={() => setExpandedExperienceIndex(isExpanded ? -1 : i)}
+                            className="flex justify-between items-center p-4 bg-white border-b border-slate-100 cursor-pointer select-none hover:bg-slate-50/50 transition-all"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-700 bg-slate-50 px-2.5 py-0.5 rounded border border-slate-200">#{i + 1}</span>
+                              <span className="text-xs font-extrabold text-slate-800 truncate max-w-[150px]">
+                                {exp.jobTitle || 'New Position'} {exp.company ? `@ ${exp.company}` : ''}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {form.experiences.length > 1 && (
+                                <button type="button" onClick={(e) => { e.stopPropagation(); removeItem('experiences', i); }}
+                                  className="text-xs text-red-500 hover:text-red-750 font-semibold p-1 hover:bg-red-50 rounded-lg transition-all"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              )}
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor"
+                                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                              </svg>
+                            </div>
+                          </div>
+                          
+                          {/* Accordion Body */}
+                          {isExpanded && (
+                            <div className="p-4 space-y-3 bg-white border-t border-slate-50 animate-fadeIn">
+                              {[
+                                { key: 'jobTitle', placeholder: 'Software Developer', label: 'Job Title' },
+                                { key: 'company', placeholder: 'Company Name', label: 'Company' },
+                                { key: 'years', placeholder: 'Jan 2023 - Present', label: 'Duration' },
+                              ].map(f => (
+                                <div key={f.key}>
+                                  <label className="text-[10px] font-bold text-slate-500 mb-0.5 block">{f.label}</label>
+                                  <input value={exp[f.key] || ''} onChange={e => handleArrayChange('experiences', i, f.key, e.target.value)}
+                                    placeholder={f.placeholder}
+                                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white" />
+                                </div>
+                              ))}
+                              <div>
+                                <label className="text-[10px] font-bold text-slate-500 mb-0.5 block">Description</label>
+                                <textarea value={exp.jobDesc || ''} onChange={e => handleArrayChange('experiences', i, 'jobDesc', e.target.value)}
+                                  placeholder="- Built React dashboard&#10;- Integrated REST APIs" rows={3}
+                                  className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white" />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button onClick={() => { addItem('experiences', emptyExp); setExpandedExperienceIndex(form.experiences.length); }}
+                    className="w-full text-sm text-indigo-600 bg-indigo-50/50 border-2 border-dashed border-indigo-200 rounded-2xl py-3 hover:bg-indigo-50 hover:border-indigo-300 transition-all font-semibold flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Experience
+                  </button>
+
+                  {/* Wizard Footer */}
+                  <div className="border-t border-slate-100 pt-4 flex justify-between">
+                    <button type="button" onClick={() => setActiveTab('personal')}
+                      className="border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                      Back
+                    </button>
+                    <button type="button" onClick={() => setActiveTab('education')}
+                      className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                    >
+                      Next: Education
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-              ))}
-              <button onClick={() => addItem('languages', emptyLang)}
-                className="w-full text-sm text-blue-600 border border-dashed border-blue-300 rounded-lg py-2 hover:bg-blue-50">
-                + Add Language
-              </button>
+              )}
+
+              {/* Tab: Education */}
+              {activeTab === 'education' && (
+                <div className="space-y-5 animate-fadeIn">
+                  <h3 className="text-xs font-extrabold text-slate-400 uppercase tracking-widest">🎓 Education</h3>
+                  
+                  <div className="space-y-4">
+                    {form.educations.map((edu, i) => {
+                      const isExpanded = expandedEducationIndex === i;
+                      return (
+                        <div key={i} className="border border-slate-150 rounded-2xl bg-slate-50/50 shadow-sm overflow-hidden hover:border-slate-200 transition-all">
+                          {/* Accordion Header */}
+                          <div onClick={() => setExpandedEducationIndex(isExpanded ? -1 : i)}
+                            className="flex justify-between items-center p-4 bg-white border-b border-slate-100 cursor-pointer select-none hover:bg-slate-50/50 transition-all"
+                          >
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold text-slate-700 bg-slate-50 px-2.5 py-0.5 rounded border border-slate-200">#{i + 1}</span>
+                              <span className="text-xs font-extrabold text-slate-800 truncate max-w-[150px]">
+                                {edu.degree || 'New Degree'} {edu.college ? `@ ${edu.college}` : ''}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {form.educations.length > 1 && (
+                                <button type="button" onClick={(e) => { e.stopPropagation(); removeItem('educations', i); }}
+                                  className="text-xs text-red-500 hover:text-red-750 font-semibold p-1 hover:bg-red-50 rounded-lg transition-all"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                  </svg>
+                                </button>
+                              )}
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor"
+                                className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                              </svg>
+                            </div>
+                          </div>
+                          
+                          {/* Accordion Body */}
+                          {isExpanded && (
+                            <div className="p-4 space-y-3 bg-white border-t border-slate-50 animate-fadeIn">
+                              {[
+                                { key: 'degree', placeholder: 'B.Tech Computer Science', label: 'Degree / Program' },
+                                { key: 'college', placeholder: 'COER University', label: 'School / University' },
+                                { key: 'gradYear', placeholder: '2025', label: 'Graduation Year' },
+                              ].map(f => (
+                                <div key={f.key}>
+                                  <label className="text-[10px] font-bold text-slate-500 mb-0.5 block">{f.label}</label>
+                                  <input value={edu[f.key] || ''} onChange={e => handleArrayChange('educations', i, f.key, e.target.value)}
+                                    placeholder={f.placeholder}
+                                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white" />
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <button onClick={() => { addItem('educations', emptyEdu); setExpandedEducationIndex(form.educations.length); }}
+                    className="w-full text-sm text-indigo-600 bg-indigo-50/50 border-2 border-dashed border-indigo-200 rounded-2xl py-3 hover:bg-indigo-50 hover:border-indigo-300 transition-all font-semibold flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.99]">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    Add Education
+                  </button>
+
+                  {/* Wizard Footer */}
+                  <div className="border-t border-slate-100 pt-4 flex justify-between">
+                    <button type="button" onClick={() => setActiveTab('experience')}
+                      className="border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                      Back
+                    </button>
+                    <button type="button" onClick={() => setActiveTab('skills')}
+                      className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold hover:bg-indigo-700 transition-all shadow-md active:scale-95 flex items-center gap-1.5"
+                    >
+                      Next: Skills & More
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab: Skills & Dynamic Arrays (Certs, Projects, Langs, Hobbies) */}
+              {activeTab === 'skills' && (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Skills */}
+                  <div className="bg-slate-50/50 border border-slate-100 p-4 rounded-2xl shadow-sm">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.2" stroke="currentColor" className="w-4 h-4 text-indigo-500">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M11.42 15.17L17.25 21A2.67 2.67 0 1021 17.25l-5.83-5.83m0 0a2.67 2.67 0 11-3.75-3.75 2.67 2.67 0 013.75 3.75z" />
+                      </svg>
+                      Skills List
+                    </h4>
+                    <input name="skills" value={form.skills} onChange={handleChange}
+                      placeholder="React, Node.js, Python, MongoDB, AWS"
+                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white" />
+                    <p className="text-[10px] text-slate-400 mt-1.5 font-semibold">Separate multiple skills with commas</p>
+                  </div>
+
+                  {/* Projects */}
+                  <div className="bg-slate-50/50 border border-slate-100 p-4 rounded-2xl shadow-sm">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3.5 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.2" stroke="currentColor" className="w-4 h-4 text-indigo-500">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />
+                      </svg>
+                      Projects
+                    </h4>
+                    {form.projects.map((proj, i) => (
+                      <div key={i} className="border border-slate-100 rounded-xl p-3.5 mb-3 bg-white shadow-sm hover:border-slate-200 transition-all">
+                        <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded border border-slate-200 shadow-inner">Project #{i + 1}</span>
+                          {form.projects.length > 1 && (
+                            <button onClick={() => removeItem('projects', i)} className="text-xs text-red-500 hover:text-red-750 font-semibold transition-all">
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        {[
+                          { key: 'name', placeholder: 'ResumeAI', label: 'Project Name' },
+                          { key: 'tech', placeholder: 'React, Node.js, MongoDB', label: 'Technologies Used' },
+                        ].map(f => (
+                          <div key={f.key} className="mb-2">
+                            <label className="text-[10px] font-bold text-slate-500 mb-0.5 block">{f.label}</label>
+                            <input value={proj[f.key] || ''} onChange={e => handleArrayChange('projects', i, f.key, e.target.value)}
+                              placeholder={f.placeholder}
+                              className="w-full rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white" />
+                          </div>
+                        ))}
+                        <div>
+                          <label className="text-[10px] font-bold text-slate-500 mb-0.5 block">Description</label>
+                          <textarea value={proj.desc || ''} onChange={e => handleArrayChange('projects', i, 'desc', e.target.value)}
+                            placeholder="AI-powered resume builder..." rows={2}
+                            className="w-full rounded-xl border border-slate-200 px-3.5 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white" />
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={() => addItem('projects', emptyProject)}
+                      className="w-full text-xs text-indigo-600 bg-white border border-indigo-200 rounded-xl py-2 mt-1 hover:bg-indigo-50 transition-all font-semibold flex items-center justify-center gap-1 shadow-sm">
+                      + Add Project
+                    </button>
+                  </div>
+
+                  {/* Certifications */}
+                  <div className="bg-slate-50/50 border border-slate-100 p-4 rounded-2xl shadow-sm">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3.5 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.2" stroke="currentColor" className="w-4 h-4 text-indigo-500">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                      </svg>
+                      Certifications
+                    </h4>
+                    {form.certifications.map((cert, i) => (
+                      <div key={i} className="border border-slate-100 rounded-xl p-3.5 mb-3 bg-white shadow-sm hover:border-slate-200 transition-all">
+                        <div className="flex justify-between items-center mb-2 pb-1.5 border-b border-slate-100">
+                          <span className="text-[11px] font-bold text-slate-600 bg-slate-50 px-2.5 py-0.5 rounded border border-slate-200 shadow-inner">Certificate #{i + 1}</span>
+                          {form.certifications.length > 1 && (
+                            <button onClick={() => removeItem('certifications', i)} className="text-xs text-red-500 hover:text-red-750 font-semibold transition-all">
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        {[
+                          { key: 'name', placeholder: 'AWS Solutions Architect', label: 'Certificate Name' },
+                          { key: 'issuer', placeholder: 'Amazon Web Services', label: 'Issuer' },
+                          { key: 'year', placeholder: '2024', label: 'Year' },
+                        ].map(f => (
+                          <div key={f.key} className="mb-2">
+                            <label className="text-[10px] font-bold text-slate-500 mb-0.5 block">{f.label}</label>
+                            <input value={cert[f.key] || ''} onChange={e => handleArrayChange('certifications', i, f.key, e.target.value)}
+                              placeholder={f.placeholder}
+                              className="w-full rounded-xl border border-slate-200 px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white" />
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                    <button onClick={() => addItem('certifications', emptyCert)}
+                      className="w-full text-xs text-indigo-600 bg-white border border-indigo-200 rounded-xl py-2 mt-1 hover:bg-indigo-50 transition-all font-semibold flex items-center justify-center gap-1 shadow-sm">
+                      + Add Certification
+                    </button>
+                  </div>
+
+                  {/* Languages */}
+                  <div className="bg-slate-50/50 border border-slate-100 p-4 rounded-2xl shadow-sm">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.2" stroke="currentColor" className="w-4 h-4 text-indigo-500">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21a.75.75 0 01-.75-.75 2.25 2.25 0 00-2.25-2.25.75.75 0 010-1.5h1.5a.75.75 0 00.75-.75v-1.5a.75.75 0 011.5 0v1.5a2.25 2.25 0 002.25 2.25.75.75 0 010 1.5h-1.5a.75.75 0 00-.75.75v1.5a.75.75 0 01-.75.75z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 110-18 9 9 0 010 18zm0-1.5a7.5 7.5 0 100-15 7.5 7.5 0 000 15z" />
+                      </svg>
+                      Languages
+                    </h4>
+                    <div className="space-y-2">
+                      {form.languages.map((lang, i) => (
+                        <div key={i} className="flex gap-2 items-center">
+                          <input value={lang.language || ''} onChange={e => handleArrayChange('languages', i, 'language', e.target.value)}
+                            placeholder="English"
+                            className="flex-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white" />
+                          <select value={lang.level || 'Intermediate'} onChange={e => handleArrayChange('languages', i, 'level', e.target.value)}
+                            className="rounded-xl border border-slate-200 px-2 py-1.5 text-xs text-slate-850 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white font-semibold">
+                            {['Native', 'Fluent', 'Advanced', 'Intermediate', 'Basic'].map(l => <option key={l}>{l}</option>)}
+                          </select>
+                          {form.languages.length > 1 && (
+                            <button type="button" onClick={() => removeItem('languages', i)} className="text-red-500 hover:text-red-700 text-lg font-bold px-1 transition-all active:scale-90">
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => addItem('languages', emptyLang)}
+                      className="w-full text-xs text-indigo-600 bg-white border border-indigo-200 rounded-xl py-2 mt-3 hover:bg-indigo-50 transition-all font-semibold flex items-center justify-center gap-1 shadow-sm">
+                      + Add Language
+                    </button>
+                  </div>
+
+                  {/* Hobbies */}
+                  <div className="bg-slate-50/50 border border-slate-100 p-4 rounded-2xl shadow-sm">
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.2" stroke="currentColor" className="w-4 h-4 text-indigo-500">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.182 15.182a4.5 4.5 0 01-6.364 0M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Hobbies & Interests
+                    </h4>
+                    <input name="hobbies" value={form.hobbies} onChange={handleChange}
+                      placeholder="Reading, Coding, Cricket, Photography"
+                      className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white" />
+                  </div>
+
+                  {/* Wizard Footer */}
+                  <div className="border-t border-slate-100 pt-4 flex justify-between">
+                    <button type="button" onClick={() => setActiveTab('education')}
+                      className="border border-slate-200 text-slate-600 px-4 py-2.5 rounded-xl text-xs font-bold hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-1.5"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                      Back
+                    </button>
+                    <span className="text-xs text-indigo-650 font-extrabold flex items-center gap-1.5 bg-indigo-50 px-3.5 py-2.5 rounded-xl shadow-sm border border-indigo-100">
+                      ✨ Ready to Export!
+                    </span>
+                  </div>
+                </div>
+              )}
+
             </div>
+          </div>
+        )}
 
-            <div>
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">🎯 Hobbies & Interests</h3>
-              <input name="hobbies" value={form.hobbies} onChange={handleChange}
-                placeholder="Reading, Coding, Cricket, Photography"
-                className="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        {/* CV Preview Section */}
+        {layoutMode !== 'editor' && (
+          <div className="flex-1 overflow-y-auto bg-slate-100 p-8 flex justify-center shadow-inner transition-all duration-300">
+            <div id="cv-preview" className="w-full max-w-2xl shadow-2xl rounded-lg overflow-hidden border border-slate-200/50 bg-white self-start">
+              {renderPreview()}
             </div>
-
           </div>
-        </div>
+        )}
 
-        <div className="flex-1 overflow-y-auto bg-gray-100 p-8 flex justify-center">
-          <div id="cv-preview" className="w-full max-w-2xl">
-            {renderPreview()}
-          </div>
-        </div>
       </div>
     </div>
   );

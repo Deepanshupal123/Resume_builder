@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 
 export default function Login() {
   const [isSignup, setIsSignup] = useState(false);
@@ -191,9 +192,9 @@ export default function Login() {
                     Password
                   </label>
                   {!isSignup && (
-                    <a className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#64748B] hover:text-[#000000] transition-colors uppercase decoration-[#64748B] underline-offset-4 hover:underline" href="#">
+                    <Link className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#64748B] hover:text-[#000000] transition-colors uppercase decoration-[#64748B] underline-offset-4 hover:underline" to="/forgot-password">
                       Forgot Password?
-                    </a>
+                    </Link>
                   )}
                 </div>
                 <div className="relative">
@@ -240,19 +241,58 @@ export default function Login() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-[24px]">
-                  <button
-                    type="button"
-                    onClick={handleGoogleLogin}
-                    disabled={googleLoading}
-                    className="flex items-center justify-center gap-3 px-4 py-3 border border-[#E2E8F0] hover:border-[#000000] transition-colors duration-300 group disabled:opacity-60"
-                  >
-                    <span className="material-symbols-outlined text-[20px] text-[#64748B] group-hover:text-[#000000]">
-                      language
-                    </span>
-                    <span className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#000000] uppercase">
-                      {googleLoading ? '...' : 'Google'}
-                    </span>
-                  </button>
+                 <GoogleLogin
+  onSuccess={async (credentialResponse) => {
+
+    try {
+
+      setGoogleLoading(true);
+
+      const res = await fetch(
+        'https://resume-builder-7ngc.onrender.com/api/auth/google',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: credentialResponse.credential,
+          }),
+        }
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        return alert(data.message);
+      }
+
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+
+      const redirectTo =
+        location.state && location.state.from
+          ? location.state.from
+          : '/dashboard';
+
+      navigate(redirectTo);
+
+    } catch (err) {
+
+      console.log(err);
+      alert('Google Login Failed');
+
+    } finally {
+
+      setGoogleLoading(false);
+
+    }
+  }}
+
+  onError={() => {
+    alert('Google Login Failed');
+  }}
+/>
                 </div>
               </>
             )}
