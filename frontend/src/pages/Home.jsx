@@ -7,11 +7,18 @@ import ActivityFeed from "../components/ActivityFeed";
 import PremiumWidget from "../components/PremiumWidget";
 import Footer from "../components/Footer";
 import DashboardCards from "../components/DashboardCards";
-
+import { useNavigate } from "react-router-dom";
 const Home = () => {
+    const navigate = useNavigate();
     const handleSelectTemplate = (id) => {
         console.log(id);
     };
+
+    const handleCreateNew = () => {
+        navigate("/builder");
+    }
+
+
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col gap-4">
 
@@ -41,7 +48,7 @@ const Home = () => {
                                 Analyze Resume
                             </button>
 
-                            <button className="px-6 py-3 rounded-lg bg-slate-900 text-white hover:bg-slate-800">
+                            <button onClick={handleCreateNew} className="px-6 py-3 rounded-lg bg-slate-900 text-white hover:bg-slate-800">
                                 Create New
                             </button>
 
@@ -84,3 +91,4 @@ const Home = () => {
 };
 
 export default Home;
+

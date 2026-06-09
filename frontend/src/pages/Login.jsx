@@ -241,58 +241,58 @@ export default function Login() {
                 </div>
 
                 <div className="grid grid-cols-1 gap-[24px]">
-                 <GoogleLogin
-  onSuccess={async (credentialResponse) => {
+                  <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
 
-    try {
+                      try {
 
-      setGoogleLoading(true);
+                        setGoogleLoading(true);
 
-      const res = await fetch(
-        'https://resume-builder-7ngc.onrender.com/api/auth/google',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: credentialResponse.credential,
-          }),
-        }
-      );
+                        const res = await fetch(
+                          'https://resume-builder-7ngc.onrender.com/api/auth/google',
+                          {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                              token: credentialResponse.credential,
+                            }),
+                          }
+                        );
 
-      const data = await res.json();
+                        const data = await res.json();
 
-      if (!res.ok) {
-        return alert(data.message);
-      }
+                        if (!res.ok) {
+                          return alert(data.message);
+                        }
 
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
 
-      const redirectTo =
-        location.state && location.state.from
-          ? location.state.from
-          : '/dashboard';
+                        const redirectTo =
+                          location.state && location.state.from
+                            ? location.state.from
+                            : '/dashboard';
 
-      navigate(redirectTo);
+                        navigate(redirectTo);
 
-    } catch (err) {
+                      } catch (err) {
 
-      console.log(err);
-      alert('Google Login Failed');
+                        console.log(err);
+                        alert('Google Login Failed');
 
-    } finally {
+                      } finally {
 
-      setGoogleLoading(false);
+                        setGoogleLoading(false);
 
-    }
-  }}
+                      }
+                    }}
 
-  onError={() => {
-    alert('Google Login Failed');
-  }}
-/>
+                    onError={() => {
+                      alert('Google Login Failed');
+                    }}
+                  />
                 </div>
               </>
             )}

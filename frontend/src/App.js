@@ -17,8 +17,13 @@ import MyResume from './components/Myresume/Myresume';
 import Settings from './components/settings/Settings';
 // ✅ checks both 'user' and 'token' keys
 function ProtectedRoute({ children }) {
-  const isLoggedIn = localStorage.getItem('user') || localStorage.getItem('token');
-  return isLoggedIn ? children : <Navigate to="/login" replace />;
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
 }
 
 function App() {
