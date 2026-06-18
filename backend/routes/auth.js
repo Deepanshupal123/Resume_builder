@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const User = require('../models/User');
 const { OAuth2Client } = require('google-auth-library');
 const { sendResetEmail } = require('../utils/sendResetEmail');
+const { findUserByEmail } = require('../utils/findUserByEmail');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // SIGNUP
@@ -18,17 +19,19 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'Sab fields bharni zaroori hain' });
     }
 
-    const existing = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+    const existing = await User.findOne({ email: normalizedEmail });
     if (existing) return res.status(400).json({ message: 'Email already registered' });
 
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed });
+    const user = await User.create({ name, email: normalizedEmail, password: hashed });
     console.log('User created:', user.email);
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    res.json({ 
-  user: { _id: user._id, name: user.name, email: user.email, isPro: user.isPro } 
-});
+    res.json({
+      token,
+      user: { _id: user._id, name: user.name, email: user.email, isPro: user.isPro },
+    });
 
   } catch (err) {
     console.log('Signup Error:', err.message);
@@ -46,10 +49,14 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: 'Email aur password dono chahiye' });
     }
 
-    const user = await User.findOne({ email });
+    const user = await findUserByEmail(email);
     console.log('User found:', user ? user.email : 'NOT FOUND');
 
     if (!user) return res.status(400).json({ message: 'Email not found' });
+
+    if (!user.password) {
+      return res.status(400).json({ message: 'This account uses Google login. Sign in with Google instead.' });
+    }
 
     const match = await bcrypt.compare(password, user.password);
     console.log('Password match:', match);
@@ -92,14 +99,14 @@ router.post('/google', async (req, res) => {
     } = payload;
 
     // CHECK USER EXISTS
-    let user = await User.findOne({ email });
+    let user = await findUserByEmail(email);
 
     // CREATE USER IF NOT EXISTS
     if (!user) {
 
       user = await User.create({
         name,
-        email,
+        email: email.toLowerCase().trim(),
         password: '',
         picture,
       });
@@ -142,9 +149,13 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ message: 'Email is required.' });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    const user = await findUserByEmail(email);
     if (!user) {
       return res.status(200).json({ message: 'If that email exists, a reset link has been generated.' });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({ message: 'This account uses Google login. Sign in with Google instead.' });
     }
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -157,19 +168,16 @@ router.post('/forgot-password', async (req, res) => {
     try {
       mailResult = await sendResetEmail(user.email, resetUrl);
     } catch (err) {
-      console.log('Error sending reset email (will fallback in development):', err);
-      if (process.env.NODE_ENV === 'development') {
-        return res.status(200).json({
-          message: 'Reset link generated in development mode (email failed).',
-          resetUrl,
-        });
-      }
-      throw err;
+      console.log('Error sending reset email:', err);
+      return res.status(200).json({
+        message: 'Could not send email. Use the reset link below.',
+        resetUrl,
+      });
     }
 
     return res.status(200).json({
       message: mailResult.fallback
-        ? 'Reset link generated in development mode. Configure SMTP to send email automatically.'
+        ? 'Reset link generated. Configure SMTP to send email automatically.'
         : 'Reset link sent to your email address.',
       resetUrl: mailResult.resetUrl || null,
     });

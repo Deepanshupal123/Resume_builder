@@ -1,21 +1,24 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [resetUrl, setResetUrl] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+    setResetUrl('');
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+      const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       });
       const data = await res.json();
 
@@ -26,9 +29,9 @@ export default function ForgotPassword() {
 
       setMessage(data.message || 'If that email exists, a reset link has been generated.');
       if (data.resetUrl) {
-        setMessage(`${data.message} Reset link: ${data.resetUrl}`);
+        setResetUrl(data.resetUrl);
       }
-    } catch (err) {
+    } catch {
       setMessage('Unable to connect to the server.');
     } finally {
       setLoading(false);
@@ -65,6 +68,14 @@ export default function ForgotPassword() {
         </form>
 
         {message && <p className="mt-4 rounded-md border border-[#E2E8F0] bg-[#f8fafc] p-3 text-sm text-[#111827]">{message}</p>}
+
+        {resetUrl && (
+          <p className="mt-3 text-sm">
+            <a href={resetUrl} className="font-semibold text-[#000000] underline break-all">
+              Open reset password page
+            </a>
+          </p>
+        )}
 
         <p className="mt-6 text-sm text-[#45464d]">
           Remembered it? <Link to="/login" className="font-semibold text-[#000000] hover:underline">Back to login</Link>

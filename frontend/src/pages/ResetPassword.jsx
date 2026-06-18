@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -29,7 +30,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/reset-password', {
+      const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword: password }),
@@ -44,7 +45,7 @@ export default function ResetPassword() {
       setMessage(data.message || 'Password reset successful. You can now log in.');
       setPassword('');
       setConfirmPassword('');
-    } catch (err) {
+    } catch {
       setMessage('Unable to connect to the server.');
     } finally {
       setLoading(false);
