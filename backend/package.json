@@ -24,6 +24,7 @@
     "nodemailer": "^7.0.13",
     "pdf-parse": "1.1.1",
     "pdfjs-dist": "^5.7.284",
+    "pdfkit": "^0.19.1",
     "razorpay": "^2.9.6"
   }
 }

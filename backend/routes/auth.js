@@ -72,7 +72,18 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-router.post('/google', async (req, res) => {
+router.post('/google', handleGoogleAuth);
+
+router.get('/google', async (req, res) => {
+  const token = req.query.token || req.body?.token;
+  if (!token) {
+    return res.status(400).json({ message: 'Google token missing. Pass ?token=GOOGLE_ID_TOKEN' });
+  }
+  req.body = { token };
+  return handleGoogleAuth(req, res);
+});
+
+async function handleGoogleAuth(req, res) {
 
   try {
 
@@ -137,7 +148,7 @@ router.post('/google', async (req, res) => {
       message: 'Google authentication failed',
     });
   }
-});
+}
 
 // FORGOT PASSWORD
 router.post('/forgot-password', async (req, res) => {
