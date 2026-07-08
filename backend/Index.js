@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
+app.set('trust proxy', 1);
 
 const frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 const corsOptions = {
