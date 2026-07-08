@@ -15,6 +15,12 @@ const createTransporter = () => {
     port,
     secure: port === 465,
     auth: { user, pass },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
 };
 
@@ -46,10 +52,12 @@ const sendResetEmail = async (to, resetUrl) => {
     await transporter.sendMail(mailOptions);
     return { ok: true, fallback: false };
   } catch (err) {
-    console.log('sendResetEmail error:', err);
-    const e = new Error('Failed to send reset email: ' + err.message);
-    e.original = err;
-    throw e;
+    console.error('sendResetEmail error:', err.message);
+    return {
+      ok: false,
+      fallback: true,
+      message: 'Failed to send reset email: ' + err.message,
+    };
   }
 };
 
