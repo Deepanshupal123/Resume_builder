@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import html2pdf from 'html2pdf.js';
+import { API_BASE } from '../utils/api';
 
 const templates = [
   { id: 'professional', name: 'Professional' },
@@ -58,9 +59,13 @@ export default function CoverLetter() {
   }
   setAiGenerating(true);
   try {
-    const response = await fetch('https://resume-builder-7ngc.onrender.com/api/ai/generate', {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${API_BASE}/api/ai/generate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
       body: JSON.stringify({
         prompt: `Write a professional cover letter body (3 paragraphs only, no greeting/sign-off) for:
 Name: ${form.name || 'the applicant'}

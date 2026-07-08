@@ -1,8 +1,7 @@
 
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE = 'https://resume-builder-7ngc.onrender.com';
+import { API_BASE } from '../utils/api';
 
 export default function JDMatch() {
   const navigate = useNavigate();
@@ -57,8 +56,12 @@ export default function JDMatch() {
       formData.append('resume', resumeFile);
       formData.append('jobDescription', jobDescription);
 
+      const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/api/ai/jd-match`, {
         method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: formData,
       });
 

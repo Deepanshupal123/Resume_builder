@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import html2pdf from 'html2pdf.js';
+import { API_BASE } from '../utils/api';
 
 export default function ResumeForm() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -37,9 +38,13 @@ export default function ResumeForm() {
     setLoading(true);
     setResume('');
     try {
-      const res = await fetch('https://resume-builder-7ngc.onrender.com/api/resume/generate', {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${API_BASE}/api/resume/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(form)
       });
       const data = await res.json();

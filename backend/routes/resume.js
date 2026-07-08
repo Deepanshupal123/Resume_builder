@@ -38,7 +38,7 @@ router.get('/list', protect, async (req, res) => {
 });
 
 // AI generate (existing)
-router.post('/generate', async (req, res) => {
+router.post('/generate', protect, async (req, res) => {
   try {
     const {
       name, email, phone, summary, skills,

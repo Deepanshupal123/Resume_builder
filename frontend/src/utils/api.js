@@ -6,6 +6,13 @@ export const API_BASE =
 
 export async function apiFetch(path, options = {}) {
   const url = `${API_BASE}${path}`;
-  const opts = Object.assign({ headers: { 'Content-Type': 'application/json' } }, options);
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const headers = Object.assign({ 'Content-Type': 'application/json' }, options.headers || {});
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const opts = Object.assign({}, options, { headers });
   return fetch(url, opts);
 }

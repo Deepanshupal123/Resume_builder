@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE = 'https://resume-builder-7ngc.onrender.com';
+import { API_BASE } from '../utils/api';
 
 export default function Analysis() {
   const navigate = useNavigate();
@@ -142,12 +141,14 @@ export default function Analysis() {
     }, 1500);
 
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch(
         `${API_BASE}/api/ai/resume-analysis`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
           body: JSON.stringify({
             resumeText,

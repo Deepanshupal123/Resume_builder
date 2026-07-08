@@ -22,12 +22,11 @@ const sendResetEmail = async (to, resetUrl) => {
   const transporter = createTransporter();
 
   if (!transporter) {
-    console.log('SMTP not configured. Reset link generated:', resetUrl);
+    console.log('SMTP not configured. Reset link generated for:', to);
     return {
       ok: true,
       fallback: true,
       message: 'Reset link generated. Configure SMTP to send email automatically.',
-      resetUrl,
     };
   }
 

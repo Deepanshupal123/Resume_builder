@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const pdfParse = require('pdf-parse');
- 
+const { protect } = require('../middleware/auth');
+
 // ── Multer config ─────────────────────────────────────────────────────────────
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -58,7 +59,7 @@ async function callGroq(prompt, maxTokens = 1500) {
 }
  
 // ── Route 1: Cover Letter Generate ───────────────────────────────────────────
-router.post('/generate', async (req, res) => {
+router.post('/generate', protect, async (req, res) => {
   try {
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ error: 'Prompt required' });
@@ -72,7 +73,7 @@ router.post('/generate', async (req, res) => {
 });
  
 // ── Route 2: ATS Score Checker (PDF Upload) ───────────────────────────────────
-router.post('/ats-check', upload.single('resume'), async (req, res) => {
+router.post('/ats-check', protect, upload.single('resume'), async (req, res) => {
   try {
     const { jobDescription } = req.body;
  
@@ -81,9 +82,6 @@ router.post('/ats-check', upload.single('resume'), async (req, res) => {
  
     // PDF se text extract karo
     const resumeText = await extractTextFromBuffer(req.file.buffer, req.file.mimetype);
- 
-    console.log('Extracted resume text length:', resumeText.length);
-    console.log('Resume preview:', resumeText.substring(0, 200));
  
     if (!resumeText || resumeText.trim().length < 50) {
       return res.status(400).json({ error: 'Resume text extract nahi hua. Text-based PDF use karo (scanned PDF kaam nahi karega).' });
@@ -115,7 +113,6 @@ Analyze carefully and respond ONLY in this exact JSON format (no extra text befo
 }`;
  
     const rawText = await callGroq(prompt, 1200);
-    console.log('AI raw response:', rawText.substring(0, 300));
  
     let result;
     try {
@@ -133,7 +130,7 @@ Analyze carefully and respond ONLY in this exact JSON format (no extra text befo
 });
  
 // ── Route 3: JD Match (PDF Upload) ───────────────────────────────────────────
-router.post('/jd-match', upload.single('resume'), async (req, res) => {
+router.post('/jd-match', protect, upload.single('resume'), async (req, res) => {
   try {
     const { jobDescription } = req.body;
  
@@ -142,8 +139,6 @@ router.post('/jd-match', upload.single('resume'), async (req, res) => {
  
     // PDF se text extract karo
     const resumeText = await extractTextFromBuffer(req.file.buffer, req.file.mimetype);
- 
-    console.log('JD Match - Resume text length:', resumeText.length);
  
     if (!resumeText || resumeText.trim().length < 50) {
       return res.status(400).json({ error: 'Resume text extract nahi hua. Text-based PDF use karo.' });
@@ -181,7 +176,7 @@ Respond ONLY in this exact JSON format (no extra text):
     res.status(500).json({ error: err.message });
   }
 });
-router.post('/resume-analysis', async (req, res) => {
+router.post('/resume-analysis', protect, async (req, res) => {
   try {
     const { resumeText } = req.body;
 

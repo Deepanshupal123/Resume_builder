@@ -12,8 +12,8 @@ const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // SIGNUP
 router.post('/signup', async (req, res) => {
   try {
-    console.log('Signup attempt:', req.body);
     const { name, email, password } = req.body;
+    console.log('Signup attempt for email:', email);
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Sab fields bharni zaroori hain' });
@@ -42,8 +42,8 @@ router.post('/signup', async (req, res) => {
 // LOGIN
 router.post('/login', async (req, res) => {
   try {
-    console.log('Login attempt:', req.body);
     const { email, password } = req.body;
+    console.log('Login attempt for email:', email);
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email aur password dono chahiye' });
@@ -154,7 +154,6 @@ async function handleGoogleAuth(req, res) {
 router.post('/forgot-password', async (req, res) => {
   try {
     const { email } = req.body;
-    console.log('Forgot-password request body:', req.body);
 
     if (!email) {
       return res.status(400).json({ message: 'Email is required.' });
@@ -179,18 +178,16 @@ router.post('/forgot-password', async (req, res) => {
     try {
       mailResult = await sendResetEmail(user.email, resetUrl);
     } catch (err) {
-      console.log('Error sending reset email:', err);
+      console.error('Error sending reset email:', err);
       return res.status(200).json({
-        message: 'Could not send email. Use the reset link below.',
-        resetUrl,
+        message: 'If that email exists, a reset link has been sent. Please check your inbox.',
       });
     }
 
     return res.status(200).json({
       message: mailResult.fallback
-        ? 'Reset link generated. Configure SMTP to send email automatically.'
-        : 'Reset link sent to your email address.',
-      resetUrl: mailResult.resetUrl || null,
+        ? 'If that email exists, a reset link has been generated. Please configure SMTP for automatic delivery.'
+        : 'If that email exists, a reset link has been sent to your email address.',
     });
   } catch (err) {
     console.log('Forgot Password Error:', err);

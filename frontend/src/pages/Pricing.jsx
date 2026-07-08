@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
-const API_BASE = 'https://resume-builder-7ngc.onrender.com';
+function getAuthHeaders() {
+  const token = localStorage.getItem('token');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export default function Pricing() {
   const navigate = useNavigate();
@@ -19,7 +23,9 @@ export default function Pricing() {
 
   const checkStatus = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/payment/status/${user._id}`);
+      const res = await fetch(`${API_BASE}/api/subscription/status`, {
+        headers: { ...getAuthHeaders() },
+      });
       const data = await res.json();
       setIsPro(data.isPro);
       setSubscriptionEnd(data.subscriptionEnd);
@@ -61,10 +67,10 @@ export default function Pricing() {
 
     setLoading(true);
     try {
-      const orderRes = await fetch(`${API_BASE}/api/payment/create-order`, {
+      const orderRes = await fetch(`${API_BASE}/api/subscription/upgrade`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: u._id })
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify({ planType: 'pro' })
       });
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
@@ -80,14 +86,13 @@ export default function Pricing() {
         description: 'Monthly Subscription - ₹10/month',
         order_id: orderData.orderId,
         handler: async (response) => {
-          const verifyRes = await fetch(`${API_BASE}/api/payment/verify`, {
+          const verifyRes = await fetch(`${API_BASE}/api/subscription/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
             body: JSON.stringify({
               razorpay_order_id: response.razorpay_order_id,
               razorpay_payment_id: response.razorpay_payment_id,
               razorpay_signature: response.razorpay_signature,
-              userId: u._id
             })
           });
           const verifyData = await verifyRes.json();
