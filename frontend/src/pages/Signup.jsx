@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_BASE } from '../utils/api';
 
 export default function Signup() {
   const [name, setName] = useState('');
@@ -12,7 +13,7 @@ export default function Signup() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch('https://resume-builder-7ngc.onrender.com/api/auth/signup', {
+      const res = await fetch(`${API_BASE}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })

@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const API_BASE = 'https://resume-builder-7ngc.onrender.com';
+import { API_BASE } from '../utils/api';
 
 export default function ATSChecker() {
   const navigate = useNavigate();
@@ -56,10 +55,13 @@ export default function ATSChecker() {
       formData.append('resume', resumeFile);
       formData.append('jobDescription', jobDescription);
 
+      const token = localStorage.getItem('token');
       const res = await fetch(`${API_BASE}/api/ai/ats-check`, {
         method: 'POST',
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: formData,
-        // Note: don't set the Content-Type header — browser sets the multipart boundary automatically
       });
 
       const data = await res.json();
