@@ -10,7 +10,7 @@ const app = express();
 const frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || [frontendOrigin, 'http://localhost:3000'].includes(origin)) {
+    if (!origin || [frontendOrigin, 'https://resume-builder-silk-five.vercel.app'].includes(origin)) {
       return callback(null, true);
     }
     return callback(new Error('Not allowed by CORS'));
