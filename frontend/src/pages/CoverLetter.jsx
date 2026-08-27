@@ -236,24 +236,39 @@ Write 3 compelling paragraphs. Be specific, professional, and concise.`
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+    <div className="min-h-screen" style={{ background: '#f4f6fa' }}>
+      {/* Dark navy editor top bar */}
+      <div className="px-5 py-2.5 flex items-center justify-between gap-4 sticky top-0 z-10"
+        style={{ background: 'linear-gradient(90deg, #101a2e, #0b1220)', borderBottom: '1px solid rgba(148,163,184,.14)' }}>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard')} className="text-gray-400 hover:text-gray-600 text-sm">← Back</button>
+          <button onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+            style={{ color: '#8b98ad', background: 'rgba(148,163,184,.09)', border: '1px solid rgba(148,163,184,.18)' }}>
+            ← Back
+          </button>
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white text-xs font-bold">R</span>
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 4px 14px rgba(99,102,241,.4)' }}>
+              <span className="text-white text-sm font-black tracking-wider">R</span>
             </div>
-            <span className="font-semibold text-gray-800">ResumeAI — Cover Letter</span>
+            <span className="font-extrabold text-base tracking-tight" style={{ color: '#e6ebf4' }}>
+              Resume<span style={{ color: '#a5b4fc' }}>AI</span>
+              <span className="hidden sm:inline font-semibold" style={{ color: '#8b98ad' }}> — Cover Letter Studio</span>
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <button onClick={handleDownloadPDF} className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
-            Download PDF ⬇
+        <div className="flex items-center gap-2.5">
+          <button onClick={handleDownloadPDF}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5"
+            style={{ background: '#4f46e5', color: '#fff', boxShadow: '0 4px 14px rgba(79,70,229,.35)' }}>
+            Download PDF
           </button>
-          <span className="text-sm text-gray-500">Hi, {user.name || 'User'} 👋</span>
-          <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-600">Logout</button>
+          <span className="hidden md:inline text-xs font-semibold" style={{ color: '#8b98ad' }}>
+            Hi, <span style={{ color: '#e6ebf4' }}>{user.name || 'User'}</span>
+          </span>
+          <button onClick={handleLogout} className="text-xs font-bold px-2.5 py-1.5 rounded-lg" style={{ color: '#fca5a5' }}>
+            Logout
+          </button>
         </div>
       </div>
 

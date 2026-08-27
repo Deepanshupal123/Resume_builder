@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { API_BASE } from '../utils/api';
+import '../styles/shell.css';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -39,47 +40,62 @@ export default function ForgotPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
-        <p className="text-sm uppercase tracking-[0.2em] text-[#64748B]">Password Recovery</p>
-        <h1 className="mt-3 text-3xl font-semibold text-[#111827]">Forgot your password?</h1>
-        <p className="mt-3 text-sm text-[#45464d]">Enter your email and we will create a secure reset link for you.</p>
+    <div style={{ minHeight: '100vh', background: 'var(--paper, #f4f6fa)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ width: '100%', maxWidth: 400 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28, justifyContent: 'center' }}>
+          <div className="shell-logo">R</div>
+          <span style={{ fontFamily: 'Geist, sans-serif', fontSize: 19, fontWeight: 700, color: 'var(--ink)' }}>
+            Resume<span style={{ color: 'var(--brand)' }}>AI</span>
+          </span>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-[#111827]">Email Address</label>
-            <input
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-[#000000] bg-white px-4 py-3 text-sm text-[#191c1e] outline-none focus:border-[#111827]"
-              placeholder="you@example.com"
-            />
+        <div className="card" style={{ padding: '32px 30px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--brand)', marginBottom: 10 }}>
+            Password Recovery
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-[#000000] py-3 text-sm font-semibold uppercase text-white transition hover:bg-[#64748B] disabled:opacity-60"
-          >
-            {loading ? 'Sending...' : 'Send Reset Link'}
-          </button>
-        </form>
-
-        {message && <p className="mt-4 rounded-md border border-[#E2E8F0] bg-[#f8fafc] p-3 text-sm text-[#111827]">{message}</p>}
-
-        {resetUrl && (
-          <p className="mt-3 text-sm">
-            <a href={resetUrl} className="font-semibold text-[#000000] underline break-all">
-              Open reset password page
-            </a>
+          <h1 style={{ margin: '0 0 8px', fontFamily: 'Geist, sans-serif', fontSize: 22, fontWeight: 700, letterSpacing: '-.02em', color: 'var(--ink)' }}>
+            Forgot your password?
+          </h1>
+          <p style={{ margin: '0 0 24px', fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.6 }}>
+            Enter your email and we will create a secure reset link for you.
           </p>
-        )}
 
-        <p className="mt-6 text-sm text-[#45464d]">
-          Remembered it? <Link to="/login" className="font-semibold text-[#000000] hover:underline">Back to login</Link>
-        </p>
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: 18 }}>
+              <label className="label">Email Address</label>
+              <input
+                className="input"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+              />
+            </div>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '11px 0' }} disabled={loading}>
+              {loading ? 'Sending…' : 'Send Reset Link'}
+            </button>
+          </form>
+
+          {message && (
+            <p style={{ marginTop: 16, padding: '10px 14px', borderRadius: 10, fontSize: 13, background: '#f9fafb', border: '1px solid var(--line)', color: 'var(--body)' }}>
+              {message}
+            </p>
+          )}
+
+          {resetUrl && (
+            <p style={{ marginTop: 10, fontSize: 13 }}>
+              <a href={resetUrl} style={{ fontWeight: 700, color: 'var(--brand)', wordBreak: 'break-all' }}>
+                Open reset password page
+              </a>
+            </p>
+          )}
+
+          <p style={{ margin: '22px 0 0', fontSize: 13.5, color: 'var(--body)' }}>
+            Remembered it?{' '}
+            <Link to="/login" style={{ fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Back to login</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

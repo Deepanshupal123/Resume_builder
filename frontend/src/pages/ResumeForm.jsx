@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import html2pdf from 'html2pdf.js';
 import { API_BASE } from '../utils/api';
+import AppShell from '../components/AppShell';
 
 export default function ResumeForm() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -26,11 +27,6 @@ export default function ResumeForm() {
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = '/';
   };
 
   const handleSubmit = async (e) => {
@@ -74,25 +70,9 @@ export default function ResumeForm() {
     : form.summary;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-100 px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-            <span className="text-white text-xs font-bold">R</span>
-          </div>
-          <span className="font-semibold text-gray-800">ResumeAI</span>
-        </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">Hi, {user.name || 'User'} 👋</span>
-          <button onClick={handleLogout} className="text-sm text-red-500 hover:text-red-600">Logout</button>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto py-10 px-4 flex gap-8">
+    <AppShell active="resume" title="AI Resume Writer" subtitle="Fill details — AI writes an ATS-friendly resume" wide>
+      <div className="flex gap-8 flex-wrap lg:flex-nowrap">
         <div className="w-full max-w-xl flex-shrink-0">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-1">Build your resume</h1>
-          <p className="text-gray-500 text-sm mb-6">Fill details — AI will handle the rest ✨</p>
-
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="bg-white rounded-2xl border border-gray-100 p-6">
               <h2 className="text-base font-medium text-gray-800 mb-4">👤 Personal info</h2>
@@ -271,6 +251,6 @@ export default function ResumeForm() {
           </div>
         )}
       </div>
-    </div>
+    </AppShell>
   );
 }

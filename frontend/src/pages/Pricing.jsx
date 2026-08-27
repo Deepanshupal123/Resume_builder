@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { API_BASE } from '../utils/api';
+import '../styles/shell.css';
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
@@ -128,7 +129,7 @@ export default function Pricing() {
           name: u.name || '',
           email: u.email || ''
         },
-        theme: { color: '#6366f1' },
+        theme: { color: '#4f46e5' },
         modal: { ondismiss: () => setLoading(false) }
       };
 
@@ -147,7 +148,7 @@ export default function Pricing() {
   const FREE_FEATURES = [
     '3 Resume Templates',
     'PDF Download',
-    'Basic Editor',
+    'Basic Editor with Cloud Save',
     'Cover Letter Builder',
     'ATS Score Checker (2/month)',
   ];
@@ -162,137 +163,128 @@ export default function Pricing() {
     'No Watermark',
   ];
 
+  const loggedIn = !!(user && user._id);
+
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)', fontFamily: 'system-ui, sans-serif' }}>
-      {/* Header */}
-      <div style={{ background: 'white', borderBottom: '1px solid #e5e7eb', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: 12 }}>
-        <button
-          onClick={() => navigate('/dashboard')}
-          style={{ background: '#f3f4f6', border: 'none', borderRadius: 8, padding: '8px 14px', cursor: 'pointer', fontSize: 14, color: '#374151' }}
-        >
-          ← Back
-        </button>
-        <h1 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: '#111827' }}>💎 Pricing</h1>
+    <div style={{ minHeight: '100vh', background: 'var(--paper, #f4f6fa)', fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        .pr-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+        @media (max-width: 800px) { .pr-cards { grid-template-columns: 1fr; } }
+      `}</style>
+
+      {/* Dark navy header band */}
+      <div style={{
+        background: 'radial-gradient(700px 320px at 15% -40%, rgba(99,102,241,.35), transparent 60%), linear-gradient(120deg, #101a2e, #0b1220)',
+        borderBottom: '1px solid rgba(148,163,184,.14)',
+        padding: '0 0 64px',
+      }}>
+        <div style={{ maxWidth: 960, margin: '0 auto', padding: '16px 20px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 46 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => navigate(loggedIn ? '/dashboard' : '/')}>
+              <div className="shell-logo">R</div>
+              <span className="shell-brand-name">Resume<em>AI</em></span>
+            </div>
+            <button
+              type="button"
+              className="btn btn-sm"
+              style={{ background: 'rgba(148,163,184,.1)', color: '#e6ebf4', border: '1px solid rgba(148,163,184,.22)' }}
+              onClick={() => navigate(loggedIn ? '/dashboard' : '/login')}
+            >
+              {loggedIn ? '← Dashboard' : 'Login'}
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: '#a5b4fc', marginBottom: 12 }}>
+              Pricing
+            </div>
+            <h1 style={{ margin: '0 0 12px', fontFamily: 'Geist, sans-serif', fontSize: 36, fontWeight: 700, letterSpacing: '-.02em', color: '#f1f5fb' }}>
+              Simple, transparent pricing
+            </h1>
+            <p style={{ margin: 0, fontSize: 15, color: '#9aa8c0' }}>
+              Start free — upgrade when you are ready
+            </p>
+          </div>
+        </div>
       </div>
 
-      <div style={{ maxWidth: 900, margin: '0 auto', padding: '48px 20px' }}>
-        <div style={{ textAlign: 'center', marginBottom: 48 }}>
-          <h2 style={{ fontSize: 36, fontWeight: 800, color: '#111827', margin: '0 0 12px' }}>
-            Simple, Transparent Pricing
-          </h2>
-          <p style={{ fontSize: 16, color: '#6b7280', margin: 0 }}>
-            Start free — upgrade when ready
-          </p>
-        </div>
-
-        {/* Active Subscription Banner */}
+      <div style={{ maxWidth: 960, margin: '-40px auto 0', padding: '0 20px 64px' }}>
         {isPro && (
-          <div style={{
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            borderRadius: 16, padding: '20px 28px', marginBottom: 32,
-            color: 'white', textAlign: 'center'
-          }}>
-            <div style={{ fontSize: 24, marginBottom: 6 }}>🎉 Pro Plan Active!</div>
-            <div style={{ fontSize: 14, opacity: 0.9 }}>
-              Valid till: {subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString('en-IN') : 'N/A'}
+          <div className="card" style={{ padding: '18px 26px', marginBottom: 22, background: 'linear-gradient(120deg, #101a2e, #0b1220)', border: '1px solid rgba(245,158,11,.35)', textAlign: 'center' }}>
+            <div style={{ fontFamily: 'Geist, sans-serif', fontSize: 19, fontWeight: 700, color: '#fbbf24', marginBottom: 4 }}>🎉 Pro Plan Active</div>
+            <div style={{ fontSize: 13, color: '#9aa8c0' }}>
+              Valid till {subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A'}
             </div>
           </div>
         )}
 
-        {/* Pricing Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 28 }}>
-
-          {/* Free Plan */}
-          <div style={{
-            background: 'white', borderRadius: 20, padding: '36px 32px',
-            boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '2px solid #e5e7eb'
-          }}>
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#6b7280', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Free</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 42, fontWeight: 800, color: '#111827' }}>₹0</span>
-                <span style={{ fontSize: 16, color: '#6b7280' }}>/month</span>
+        <div className="pr-cards">
+          {/* Free */}
+          <div className="card" style={{ padding: '32px 30px' }}>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.1em' }}>Free</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                <span style={{ fontFamily: 'Geist, sans-serif', fontSize: 40, fontWeight: 800, color: 'var(--ink)' }}>₹0</span>
+                <span style={{ fontSize: 15, color: 'var(--muted)' }}>/month</span>
               </div>
-              <p style={{ fontSize: 14, color: '#6b7280', margin: '8px 0 0' }}>Always free</p>
+              <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '8px 0 0' }}>Always free — no card required</p>
             </div>
-            <div style={{ marginBottom: 28 }}>
+            <div style={{ marginBottom: 26 }}>
               {FREE_FEATURES.map((f, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 12, fontSize: 14, color: '#374151' }}>
-                  <span style={{ color: '#22c55e', fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
+                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 11, fontSize: 14, color: 'var(--body)' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#16a34a', flexShrink: 0 }}>check_circle</span> {f}
                 </div>
               ))}
             </div>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                width: '100%', padding: '13px', borderRadius: 10,
-                border: '2px solid #e5e7eb', background: 'white',
-                fontSize: 15, fontWeight: 600, color: '#374151', cursor: 'pointer'
-              }}
-            >
-              Current Plan
+            <button type="button" className="btn btn-ghost" style={{ width: '100%' }} onClick={() => navigate(loggedIn ? '/dashboard' : '/login')}>
+              {loggedIn ? 'Current Plan' : 'Start Free'}
             </button>
           </div>
 
-          {/* Pro Plan */}
-          <div style={{
-            background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
-            borderRadius: 20, padding: '36px 32px',
-            boxShadow: '0 8px 32px rgba(99,102,241,0.35)',
-            position: 'relative', overflow: 'hidden'
-          }}>
-            <div style={{
-              position: 'absolute', top: 16, right: 16,
-              background: '#fbbf24', color: '#78350f',
-              borderRadius: 20, padding: '4px 14px', fontSize: 12, fontWeight: 700
-            }}>
+          {/* Pro */}
+          <div className="hero-dark" style={{ padding: '32px 30px', position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 18, right: 18, background: '#fbbf24', color: '#78350f', borderRadius: 20, padding: '4px 14px', fontSize: 11.5, fontWeight: 800 }}>
               ⭐ Most Popular
             </div>
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Pro</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 42, fontWeight: 800, color: 'white' }}>₹199</span>
-                 <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)' }}>/month</span>
+            <div style={{ marginBottom: 22 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#a5b4fc', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '.1em' }}>Pro</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                <span style={{ fontFamily: 'Geist, sans-serif', fontSize: 40, fontWeight: 800, color: '#f1f5fb' }}>₹199</span>
+                <span style={{ fontSize: 15, color: '#9aa8c0' }}>/month</span>
               </div>
-              <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: '8px 0 0' }}>Unlock everything</p>
+              <p style={{ fontSize: 13.5, color: '#9aa8c0', margin: '8px 0 0' }}>Everything unlocked, cancel anytime</p>
             </div>
-            <div style={{ marginBottom: 28 }}>
+            <div style={{ marginBottom: 26 }}>
               {PRO_FEATURES.map((f, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 12, fontSize: 14, color: 'white' }}>
-                  <span style={{ color: '#86efac', fontWeight: 700, flexShrink: 0 }}>✓</span> {f}
+                <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 11, fontSize: 14, color: '#dbe3f0' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#4ade80', flexShrink: 0 }}>check_circle</span> {f}
                 </div>
               ))}
             </div>
             {isPro ? (
-              <button style={{
-                width: '100%', padding: '13px', borderRadius: 10,
-                border: 'none', background: 'rgba(255,255,255,0.25)',
-                fontSize: 15, fontWeight: 600, color: 'white', cursor: 'default'
-              }}>
+              <button type="button" className="btn" style={{ width: '100%', background: 'rgba(255,255,255,.16)', color: '#fff', cursor: 'default' }}>
                 ✅ Active Plan
               </button>
             ) : (
-              <button
-                onClick={handlePayment}
-                disabled={loading}
-                style={{
-                  width: '100%', padding: '13px', borderRadius: 10,
-                  border: 'none', background: 'white',
-                  fontSize: 15, fontWeight: 700, color: '#6366f1',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-                }}
-              >
-                {loading ? 'Opening Razorpay…' : '🚀 Upgrade to Pro — ₹199/mo'}
+              <button type="button" className="btn btn-primary btn-lg" style={{ width: '100%' }} onClick={handlePayment} disabled={loading}>
+                {loading ? 'Opening Razorpay…' : 'Upgrade to Pro — ₹199/mo'}
               </button>
             )}
           </div>
         </div>
 
         {/* Trust badges */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 32, marginTop: 40, flexWrap: 'wrap' }}>
-          {['🔒 Secure Payment', '↩️ Cancel Anytime', '⚡ Instant Activation', '🇮🇳 Made for India'].map((b, i) => (
-            <div key={i} style={{ fontSize: 13, color: '#6b7280', fontWeight: 500 }}>{b}</div>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 28, marginTop: 36, flexWrap: 'wrap' }}>
+          {[
+            { icon: 'lock', text: 'Secure Payment' },
+            { icon: 'undo', text: 'Cancel Anytime' },
+            { icon: 'bolt', text: 'Instant Activation' },
+            { icon: 'flag', text: 'Made for India' },
+          ].map((b) => (
+            <div key={b.text} style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16, color: 'var(--brand)' }}>{b.icon}</span>
+              {b.text}
+            </div>
           ))}
         </div>
       </div>

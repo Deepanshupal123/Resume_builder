@@ -201,23 +201,23 @@
       }
 
       /* Custom scrollbar */
-      ::-webkit-scrollbar       { width: 4px; height: 4px; }
+      ::-webkit-scrollbar       { width: 6px; height: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: #404752; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb { background: #c2cad6; border-radius: 10px; }
+      ::-webkit-scrollbar-thumb:hover { background: #a7b2c2; }
 
       /* Smooth page transitions */
       * { box-sizing: border-box; }
 
       /* Selection color */
       ::selection {
-        background: rgba(160, 202, 255, 0.2);
-        color: #e2e2e8;
+        background: rgba(79, 70, 229, 0.18);
       }
 
-      /* Base body — always dark */
+      /* Base body — light paper (pages set their own darker chrome) */
       body {
-        background-color: #111318;
-        color: #e2e2e8;
+        background-color: #f4f6fa;
+        color: #101828;
         font-family: 'Inter', sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { GoogleLogin } from '@react-oauth/google';
 import { API_BASE } from '../utils/api';
+import '../styles/shell.css';
 
 export default function Login() {
   const [isSignup, setIsSignup] = useState(false);
@@ -10,7 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
+  const [, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -68,18 +69,6 @@ export default function Login() {
     }
   };
 
-  const handleGoogleLogin = async () => {
-    setGoogleLoading(true);
-    try {
-      console.log('Google login initiated');
-      alert('Google login integration - replace with actual OAuth implementation');
-    } catch (err) {
-      alert('Failed to login with Google');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   const toggleMode = () => {
     setIsSignup(!isSignup);
     setName('');
@@ -88,82 +77,85 @@ export default function Login() {
     setShowPassword(false);
   };
 
+  const highlights = [
+    { icon: 'style', text: '20+ professional resume templates' },
+    { icon: 'auto_fix_high', text: 'AI writes summaries and bullet points' },
+    { icon: 'shield', text: 'ATS score checks against any job post' },
+    { icon: 'cloud_done', text: 'Cloud save — edit from anywhere' },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#f7f9fb] text-[#191c1e] font-['Inter'] flex flex-col">
-      <main className="flex-grow flex flex-col md:flex-row min-h-screen">
-        {/* Brand Section (Left Side - Desktop) */}
-        <section className="hidden md:flex md:w-1/2 bg-[#000000] items-center justify-center p-[64px] relative overflow-hidden">
-          <div className="relative z-10 max-w-md">
-            <h1 className="font-['Source_Serif_4'] text-[32px] leading-[40px] font-semibold text-white mb-6">
-              Executive Slate
-            </h1>
-            <blockquote className="mb-12">
-              <p className="font-['Source_Serif_4'] text-[24px] leading-[32px] font-semibold text-white italic font-normal leading-relaxed opacity-90">
-                "Build your authority."
-              </p>
-              <footer className="mt-4 text-[#64748B] text-[12px] leading-[16px] tracking-[0.05em] font-semibold uppercase">
-                The Professional Standard
-              </footer>
-            </blockquote>
-            <div className="bg-white/5 p-[24px] border border-white/10 rounded-lg">
-              <p className="text-[14px] leading-[20px] font-normal text-white/70 italic">
-                "The minimalist design and structural clarity of Executive Slate allowed me to present my career history with an authority I hadn't achieved before. It's truly a cut above."
-              </p>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#64748B] rounded-full flex items-center justify-center text-white font-bold">
-                  JD
-                </div>
-                <div>
-                  <p className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-white uppercase">
-                    Julian Draxler
-                  </p>
-                  <p className="text-[10px] text-[#64748B] uppercase tracking-tighter">
-                    SVP Operations, Fintech Global
-                  </p>
-                </div>
+    <div style={{ minHeight: '100vh', display: 'flex', fontFamily: "'Inter', sans-serif", background: 'var(--paper, #f4f6fa)' }}>
+      <style>{`
+        .auth-brand { display: flex; }
+        @media (max-width: 860px) { .auth-brand { display: none; } }
+      `}</style>
+
+      {/* Dark brand panel */}
+      <section className="auth-brand" style={{
+        width: '46%',
+        background: 'radial-gradient(600px 400px at 20% 0%, rgba(99,102,241,.32), transparent 60%), linear-gradient(160deg, #101a2e, #0b1220)',
+        borderRight: '1px solid rgba(148,163,184,.14)',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        padding: '56px 60px',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 44 }}>
+          <div className="shell-logo" style={{ width: 40, height: 40, fontSize: 17 }}>R</div>
+          <span className="shell-brand-name" style={{ fontSize: 21 }}>Resume<em>AI</em></span>
+        </div>
+
+        <h1 style={{ margin: '0 0 14px', fontFamily: 'Geist, sans-serif', fontSize: 34, fontWeight: 700, lineHeight: 1.2, letterSpacing: '-.02em', color: '#f1f5fb', maxWidth: 420 }}>
+          Your career deserves a{' '}
+          <span style={{ background: 'linear-gradient(90deg,#a5b4fc,#c4b5fd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            world-class resume
+          </span>
+        </h1>
+        <p style={{ margin: '0 0 36px', fontSize: 15, lineHeight: 1.65, color: '#9aa8c0', maxWidth: 400 }}>
+          Build, score, and tailor job applications with AI — trusted by job seekers across India.
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          {highlights.map((h) => (
+            <div key={h.text} style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 10, background: 'rgba(99,102,241,.16)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <span className="material-symbols-outlined" style={{ fontSize: 18, color: '#a5b4fc' }}>{h.icon}</span>
               </div>
+              <span style={{ fontSize: 14, color: '#c3cddf' }}>{h.text}</span>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Form panel */}
+      <section style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+        <div style={{ width: '100%', maxWidth: 400 }}>
+          {/* Mobile brand */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 30, justifyContent: 'center' }}>
+            <div className="shell-logo" style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>R</div>
+            <span style={{ fontFamily: 'Geist, sans-serif', fontSize: 19, fontWeight: 700, color: 'var(--ink, #101828)' }}>
+              Resume<span style={{ color: 'var(--brand, #4f46e5)' }}>AI</span>
+            </span>
           </div>
-          {/* Subtle atmospheric texture */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-full" style={{ backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(255,255,255,0.05) 0%, transparent 50%)' }}></div>
-          </div>
-        </section>
 
-        {/* Login/Signup Form Section */}
-        <section className="w-full md:w-1/2 flex items-center justify-center p-[16px] md:p-[64px] bg-[#f7f9fb]">
-          <div className="w-full max-w-[400px]">
-            {/* Mobile Branding */}
-            <div className="md:hidden mb-12 text-center">
-              <h1 className="font-['Source_Serif_4'] text-[28px] leading-[36px] font-semibold text-[#000000] mb-2">
-                Executive Slate
-              </h1>
-              <p className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#64748B] uppercase">
-                Build your authority.
-              </p>
-            </div>
+          <div className="card" style={{ padding: '32px 30px' }}>
+            <h2 style={{ margin: '0 0 6px', fontFamily: 'Geist, sans-serif', fontSize: 22, fontWeight: 700, letterSpacing: '-.02em', color: 'var(--ink)' }}>
+              {isSignup ? 'Create your account' : 'Welcome back'}
+            </h2>
+            <p style={{ margin: '0 0 24px', fontSize: 13.5, color: 'var(--muted)' }}>
+              {isSignup
+                ? 'Join free — build your first resume in minutes.'
+                : 'Log in to your workspace and resumes.'}
+            </p>
 
-            <div className="mb-10">
-              <h2 className="font-['Source_Serif_4'] text-[24px] leading-[32px] font-semibold text-[#000000] mb-2">
-                {isSignup ? 'Create Account' : 'Welcome Back'}
-              </h2>
-              <p className="text-[14px] leading-[20px] font-normal text-[#45464d]">
-                {isSignup
-                  ? 'Join Executive Slate and build your professional presence.'
-                  : 'Access your executive workspace and resumes.'}
-              </p>
-            </div>
-
-            <form className="space-y-6" onSubmit={isSignup ? handleSignup : handleLogin}>
+            <form onSubmit={isSignup ? handleSignup : handleLogin}>
               {isSignup && (
-                <div className="space-y-2">
-                  <label className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#000000] uppercase" htmlFor="name">
-                    Full Name
-                  </label>
+                <div style={{ marginBottom: 14 }}>
+                  <label className="label" htmlFor="name">Full Name</label>
                   <input
-                    className="w-full px-4 py-3 bg-white border border-[#000000] rounded-none text-[14px] leading-[20px] font-normal text-[#191c1e] focus:outline-none focus:border-[#000000]"
+                    className="input"
                     id="name"
-                    placeholder="e.g., Stephen King"
+                    placeholder="e.g. Deepanshu Pal"
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -172,14 +164,12 @@ export default function Login() {
                 </div>
               )}
 
-              <div className="space-y-2">
-                <label className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#000000] uppercase" htmlFor="email">
-                  Email Address
-                </label>
+              <div style={{ marginBottom: 14 }}>
+                <label className="label" htmlFor="email">Email Address</label>
                 <input
-                  className="w-full px-4 py-3 bg-white border border-[#000000] rounded-none text-[14px] leading-[20px] font-normal text-[#191c1e] focus:outline-none focus:border-[#000000]"
+                  className="input"
                   id="email"
-                  placeholder="e.g., stephen.king@executive.com"
+                  placeholder="you@email.com"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -187,156 +177,107 @@ export default function Login() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <label className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#000000] uppercase" htmlFor="password">
-                    Password
-                  </label>
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <label className="label" htmlFor="password">Password</label>
                   {!isSignup && (
-                    <Link className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#64748B] hover:text-[#000000] transition-colors uppercase decoration-[#64748B] underline-offset-4 hover:underline" to="/forgot-password">
-                      Forgot Password?
+                    <Link to="/forgot-password" style={{ fontSize: 12, fontWeight: 600, color: 'var(--brand)', textDecoration: 'none' }}>
+                      Forgot password?
                     </Link>
                   )}
                 </div>
-                <div className="relative">
+                <div style={{ position: 'relative' }}>
                   <input
-                    className="w-full px-4 py-3 bg-white border border-[#000000] rounded-none text-[14px] leading-[20px] font-normal text-[#191c1e] focus:outline-none focus:border-[#000000] pr-12"
+                    className="input"
                     id="password"
-                    placeholder={isSignup ? "Min 6 characters" : "••••••••"}
-                    type={showPassword ? "text" : "password"}
+                    placeholder={isSignup ? 'Min 6 characters' : '••••••••'}
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    style={{ paddingRight: 42 }}
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#64748B] hover:text-[#000000] transition-colors"
+                    style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 0, cursor: 'pointer', color: 'var(--muted)', padding: 2, display: 'flex' }}
+                    aria-label="Toggle password visibility"
                   >
-                    <span className="material-symbols-outlined text-[20px]">
-                      {showPassword ? "visibility_off" : "visibility"}
+                    <span className="material-symbols-outlined" style={{ fontSize: 19 }}>
+                      {showPassword ? 'visibility_off' : 'visibility'}
                     </span>
                   </button>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-[#000000] text-white py-4 text-[12px] leading-[16px] tracking-[0.05em] font-semibold uppercase hover:bg-[#64748B] transition-all duration-300 active:scale-[0.98] disabled:opacity-60"
-              >
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '11px 0' }} disabled={loading}>
                 {loading
-                  ? (isSignup ? 'Creating Account...' : 'Logging in...')
+                  ? (isSignup ? 'Creating account…' : 'Logging in…')
                   : (isSignup ? 'Create Account' : 'Login')}
               </button>
             </form>
 
             {!isSignup && (
               <>
-                <div className="relative my-10 flex items-center">
-                  <div className="flex-grow border-t border-[#E2E8F0]"></div>
-                  <span className="px-4 text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#64748B] uppercase">
-                    or continue with
-                  </span>
-                  <div className="flex-grow border-t border-[#E2E8F0]"></div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '22px 0' }}>
+                  <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
+                  <span style={{ fontSize: 11.5, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '.06em' }}>or continue with</span>
+                  <div style={{ flex: 1, height: 1, background: 'var(--line)' }} />
                 </div>
 
-                <div className="grid grid-cols-1 gap-[24px]">
-                 <GoogleLogin
-  onSuccess={async (credentialResponse) => {
-
-    try {
-
-      setGoogleLoading(true);
-
-      const res = await fetch(
-        `${API_BASE}/api/auth/google`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: credentialResponse.credential,
-          }),
-        }
-      );
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        return alert(data.message);
-      }
-
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
-      const redirectTo =
-        location.state && location.state.from
-          ? location.state.from
-          : '/dashboard';
-
-      navigate(redirectTo);
-
-    } catch (err) {
-
-      console.log(err);
-      alert('Google Login Failed');
-
-    } finally {
-
-      setGoogleLoading(false);
-
-    }
-  }}
-
-  onError={() => {
-    alert('Google Login Failed');
-  }}
-/>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <GoogleLogin
+                    onSuccess={async (credentialResponse) => {
+                      try {
+                        setGoogleLoading(true);
+                        const res = await fetch(`${API_BASE}/api/auth/google`, {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ token: credentialResponse.credential }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok) {
+                          return alert(data.message);
+                        }
+                        localStorage.setItem('token', data.token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        const redirectTo =
+                          location.state && location.state.from
+                            ? location.state.from
+                            : '/dashboard';
+                        navigate(redirectTo);
+                      } catch (err) {
+                        console.log(err);
+                        alert('Google Login Failed');
+                      } finally {
+                        setGoogleLoading(false);
+                      }
+                    }}
+                    onError={() => {
+                      alert('Google Login Failed');
+                    }}
+                  />
                 </div>
               </>
             )}
 
-            <p className="mt-12 text-center text-[14px] leading-[20px] font-normal text-[#45464d]">
-              {isSignup ? 'Already have an account?' : 'New to Executive Slate?'}
-              {' '}
+            <p style={{ margin: '24px 0 0', textAlign: 'center', fontSize: 13.5, color: 'var(--body)' }}>
+              {isSignup ? 'Already have an account?' : 'New to ResumeAI?'}{' '}
               <button
+                type="button"
                 onClick={toggleMode}
-                className="text-[#000000] font-bold hover:underline decoration-[#000000] underline-offset-4"
+                style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', color: 'var(--brand)', fontWeight: 700, fontSize: 13.5, fontFamily: 'inherit' }}
               >
-                {isSignup ? 'Login' : 'Create an Account'}
+                {isSignup ? 'Login' : 'Create an account'}
               </button>
             </p>
           </div>
-        </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="bg-[#f7f9fb] py-[8px] px-[64px] border-t border-[#E2E8F0]">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4 opacity-60">
-          <p className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#45464d] uppercase tracking-tighter">
-            © 2024 Executive Slate. All rights reserved.
+          <p style={{ margin: '20px 0 0', textAlign: 'center', fontSize: 12, color: 'var(--muted)' }}>
+            © {new Date().getFullYear()} ResumeAI. All rights reserved.
           </p>
-          <div className="flex gap-[24px]">
-            <a className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#45464d] hover:text-[#000000] uppercase" href="#">
-              Privacy Policy
-            </a>
-            <a className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#45464d] hover:text-[#000000] uppercase" href="#">
-              Terms of Service
-            </a>
-            <a className="text-[12px] leading-[16px] tracking-[0.05em] font-semibold text-[#45464d] hover:text-[#000000] uppercase" href="#">
-              Help Center
-            </a>
-          </div>
         </div>
-      </footer>
-
-      <style>{`
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-      `}</style>
+      </section>
     </div>
   );
 }

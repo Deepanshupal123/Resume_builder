@@ -26,6 +26,35 @@ router.get('/profile', protect, async (req, res) => {
   }
 });
 
+// PUT update profile (name)
+router.put('/profile', protect, async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Name is required' });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { name: name.trim() },
+      { new: true }
+    ).select('-password -resetPasswordToken -resetPasswordExpires');
+    res.json({
+      success: true,
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        picture: user.picture,
+        plan: user.plan,
+        isPro: user.isPro,
+        subscriptionEnd: user.subscriptionEnd,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // POST change password
 router.post('/change-password', protect, async (req, res) => {
   try {

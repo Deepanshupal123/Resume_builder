@@ -1,6 +1,33 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { API_BASE } from '../utils/api';
+import '../styles/shell.css';
+
+/* Defined outside the page component so inputs keep focus across re-renders */
+const PasswordField = ({ label, value, onChange, show, toggle, placeholder }) => (
+  <div style={{ marginBottom: 16 }}>
+    <label className="label">{label}</label>
+    <div style={{ position: 'relative' }}>
+      <input
+        className="input"
+        type={show ? 'text' : 'password'}
+        required
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        style={{ paddingRight: 42 }}
+      />
+      <button
+        type="button"
+        onClick={toggle}
+        style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 0, cursor: 'pointer', color: 'var(--muted)', padding: 2, display: 'flex' }}
+        aria-label="Toggle password visibility"
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 19 }}>{show ? 'visibility_off' : 'visibility'}</span>
+      </button>
+    </div>
+  </div>
+);
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -21,14 +48,12 @@ export default function ResetPassword() {
       setMessage('Password must be at least 6 characters long.');
       return;
     }
-
     if (password !== confirmPassword) {
       setMessage('Passwords do not match.');
       return;
     }
 
     setLoading(true);
-
     try {
       const res = await fetch(`${API_BASE}/api/auth/reset-password`, {
         method: 'POST',
@@ -53,75 +78,64 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f9fb] flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md rounded-xl border border-[#E2E8F0] bg-white p-8 shadow-sm">
-        <p className="text-sm uppercase tracking-[0.2em] text-[#64748B]">Reset Password</p>
-        <h1 className="mt-3 text-3xl font-semibold text-[#111827]">Create a new password</h1>
-        <p className="mt-3 text-sm text-[#45464d]">Choose a strong password for your account.</p>
+    <div style={{ minHeight: '100vh', background: 'var(--paper, #f4f6fa)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px', fontFamily: "'Inter', sans-serif" }}>
+      <div style={{ width: '100%', maxWidth: 400 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 28, justifyContent: 'center' }}>
+          <div className="shell-logo">R</div>
+          <span style={{ fontFamily: 'Geist, sans-serif', fontSize: 19, fontWeight: 700, color: 'var(--ink)' }}>
+            Resume<span style={{ color: 'var(--brand)' }}>AI</span>
+          </span>
+        </div>
 
-        {!isReady ? (
-          <p className="mt-6 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">Missing reset token.</p>
-        ) : (
-          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-[#111827]">New Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-[#000000] bg-white px-4 py-3 pr-12 text-sm text-[#191c1e] outline-none focus:border-[#111827]"
-                  placeholder="At least 6 characters"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#000000]"
-                  aria-label="Toggle password visibility"
-                >
-                  <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
-                </button>
-              </div>
-            </div>
+        <div className="card" style={{ padding: '32px 30px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.14em', textTransform: 'uppercase', color: 'var(--brand)', marginBottom: 10 }}>
+            Reset Password
+          </div>
+          <h1 style={{ margin: '0 0 8px', fontFamily: 'Geist, sans-serif', fontSize: 22, fontWeight: 700, letterSpacing: '-.02em', color: 'var(--ink)' }}>
+            Create a new password
+          </h1>
+          <p style={{ margin: '0 0 24px', fontSize: 13.5, color: 'var(--muted)' }}>
+            Choose a strong password for your account.
+          </p>
 
-            <div>
-              <label className="mb-1 block text-sm font-semibold text-[#111827]">Confirm Password</label>
-              <div className="relative">
-                <input
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full border border-[#000000] bg-white px-4 py-3 pr-12 text-sm text-[#191c1e] outline-none focus:border-[#111827]"
-                  placeholder="Repeat password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#64748B] hover:text-[#000000]"
-                  aria-label="Toggle confirm password visibility"
-                >
-                  <span className="material-symbols-outlined text-[20px]">{showConfirmPassword ? 'visibility_off' : 'visibility'}</span>
-                </button>
-              </div>
-            </div>
+          {!isReady ? (
+            <p style={{ padding: '10px 14px', borderRadius: 10, fontSize: 13, background: 'var(--red-soft)', border: '1px solid #fecdca', color: 'var(--red)' }}>
+              Missing reset token.
+            </p>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <PasswordField
+                label="New Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                show={showPassword}
+                toggle={() => setShowPassword(!showPassword)}
+                placeholder="At least 6 characters"
+              />
+              <PasswordField
+                label="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                show={showConfirmPassword}
+                toggle={() => setShowConfirmPassword(!showConfirmPassword)}
+                placeholder="Repeat password"
+              />
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '11px 0', marginTop: 4 }} disabled={loading}>
+                {loading ? 'Updating…' : 'Reset Password'}
+              </button>
+            </form>
+          )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-[#000000] py-3 text-sm font-semibold uppercase text-white transition hover:bg-[#64748B] disabled:opacity-60"
-            >
-              {loading ? 'Updating...' : 'Reset Password'}
-            </button>
-          </form>
-        )}
+          {message && (
+            <p style={{ marginTop: 16, padding: '10px 14px', borderRadius: 10, fontSize: 13, background: '#f9fafb', border: '1px solid var(--line)', color: 'var(--body)' }}>
+              {message}
+            </p>
+          )}
 
-        {message && <p className="mt-4 rounded-md border border-[#E2E8F0] bg-[#f8fafc] p-3 text-sm text-[#111827]">{message}</p>}
-
-        <p className="mt-6 text-sm text-[#45464d]">
-          <Link to="/login" className="font-semibold text-[#000000] hover:underline">Back to login</Link>
-        </p>
+          <p style={{ margin: '22px 0 0', fontSize: 13.5 }}>
+            <Link to="/login" style={{ fontWeight: 700, color: 'var(--brand)', textDecoration: 'none' }}>Back to login</Link>
+          </p>
+        </div>
       </div>
     </div>
   );

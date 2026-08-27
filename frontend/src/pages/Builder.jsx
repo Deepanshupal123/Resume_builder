@@ -1,7 +1,8 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import html2pdf from 'html2pdf.js';
 import UpgradeModal from '../pages/UpgradeModal';
+import { apiFetch } from '../utils/api';
 
 
 const templates = [
@@ -50,6 +51,13 @@ export default function Builder() {
   const [templateCategory, setTemplateCategory] = useState('all'); // 'all', 'free', 'pro'
   const [templateSearch, setTemplateSearch] = useState('');
 
+  // Cloud save / load state
+  const [resumeId, setResumeId] = useState(() => localStorage.getItem('editResumeId') || null);
+  const [resumeTitle, setResumeTitle] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [savedAt, setSavedAt] = useState(null);
+  const [saveError, setSaveError] = useState('');
+
   const [form, setForm] = useState({
     name: user.name || '',
     email: user.email || '',
@@ -69,6 +77,86 @@ export default function Builder() {
     accentColor: '#1d4ed8',
     fontFamily: 'Arial, sans-serif',
     fontSize: 12,
+  });
+
+  // Load saved resume (from MyResumes/Dashboard "Edit") or restore local draft
+  useEffect(() => {
+    const id = localStorage.getItem('editResumeId');
+    if (id) {
+      (async () => {
+        try {
+          const res = await apiFetch(`/api/resume/${id}`);
+          if (!res.ok) throw new Error('not found');
+          const data = await res.json();
+          const r = data.resume;
+          setResumeTitle(r.title || '');
+          if (r.template) {
+            setActiveTemplate(r.template);
+            localStorage.setItem('selectedTemplate', r.template);
+          }
+          if (r.data && typeof r.data === 'object' && Object.keys(r.data).length) {
+            setForm((prev) => ({ ...prev, ...r.data }));
+          }
+          setResumeId(id);
+          setSavedAt(r.updatedAt ? new Date(r.updatedAt) : new Date());
+        } catch {
+          localStorage.removeItem('editResumeId');
+          setResumeId(null);
+        }
+      })();
+    } else {
+      try {
+        const draft = JSON.parse(localStorage.getItem('builderDraft') || 'null');
+        if (draft && draft.form) {
+          setForm((prev) => ({ ...prev, ...draft.form }));
+          if (draft.title) setResumeTitle(draft.title);
+        }
+      } catch { /* corrupt draft — ignore */ }
+    }
+  }, []);
+
+  // Autosave draft locally (debounced) so work is never lost on refresh
+  useEffect(() => {
+    const t = setTimeout(() => {
+      try {
+        localStorage.setItem('builderDraft', JSON.stringify({ form, title: resumeTitle }));
+      } catch { /* quota exceeded (large photo) — skip */ }
+    }, 800);
+    return () => clearTimeout(t);
+  }, [form, resumeTitle]);
+
+  const handleSave = async () => {
+    const title = resumeTitle.trim() || form.name?.trim() || 'Untitled Resume';
+    setSaving(true);
+    setSaveError('');
+    try {
+      const payload = JSON.stringify({ title, template: activeTemplate, data: form });
+      const res = resumeId
+        ? await apiFetch(`/api/resume/${resumeId}`, { method: 'PUT', body: payload })
+        : await apiFetch('/api/resume/create', { method: 'POST', body: payload });
+      const data = await res.json();
+      if (!res.ok || !data.resume) throw new Error(data.message || 'Save failed');
+      setResumeId(data.resume._id);
+      localStorage.setItem('editResumeId', data.resume._id);
+      setResumeTitle(data.resume.title || title);
+      setSavedAt(new Date());
+    } catch (err) {
+      setSaveError(err.message || 'Save failed');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Ctrl+S / Cmd+S saves to cloud
+  useEffect(() => {
+    const onKey = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
   });
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
@@ -249,43 +337,80 @@ export default function Builder() {
           -ms-overflow-style: none;
           scrollbar-width: none;
         }
+        input.bx-title {
+          background-color: transparent !important;
+          color: #f1f5fb !important;
+          -webkit-text-fill-color: #f1f5fb !important;
+          border: 1px solid transparent;
+          border-radius: 8px;
+          padding: 5px 10px;
+          font-size: 13.5px;
+          font-weight: 600;
+          outline: none;
+          width: 200px;
+          transition: border-color .15s, background-color .15s;
+        }
+        input.bx-title::placeholder {
+          color: #64748b !important;
+          -webkit-text-fill-color: #64748b !important;
+        }
+        input.bx-title:hover { border-color: rgba(148,163,184,.25); }
+        input.bx-title:focus {
+          border-color: rgba(129,140,248,.6);
+          background-color: rgba(148,163,184,.08) !important;
+        }
       `}</style>
       
       {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
       
-      {/* Visual Glassmorphic Top Bar Header */}
-      <div className="backdrop-blur-md bg-white/95 border-b border-slate-100 px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm shadow-slate-100/50">
-        <div className="flex items-center gap-4">
-          <button onClick={() => navigate('/dashboard')} className="text-slate-400 hover:text-slate-700 flex items-center gap-1 text-xs font-semibold bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 transition-all active:scale-95">
+      {/* Dark navy editor top bar */}
+      <div className="px-5 py-2.5 flex items-center justify-between gap-4 sticky top-0 z-20"
+        style={{ background: 'linear-gradient(90deg, #101a2e, #0b1220)', borderBottom: '1px solid rgba(148,163,184,.14)' }}>
+        <div className="flex items-center gap-3 min-w-0">
+          <button onClick={() => navigate('/dashboard')}
+            className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-all active:scale-95"
+            style={{ color: '#8b98ad', background: 'rgba(148,163,184,.09)', border: '1px solid rgba(148,163,184,.18)' }}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
             Back
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center shadow-md shadow-indigo-500/20">
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', boxShadow: '0 4px 14px rgba(99,102,241,.4)' }}>
               <span className="text-white text-sm font-black tracking-wider">R</span>
             </div>
-            <span className="font-extrabold text-slate-800 text-lg tracking-tight">Resume<span className="text-indigo-600 bg-indigo-50 px-1 py-0.5 rounded-md ml-0.5 font-bold">AI</span></span>
+            <span className="font-extrabold text-lg tracking-tight hidden lg:inline" style={{ color: '#e6ebf4' }}>
+              Resume<span style={{ color: '#a5b4fc' }}>AI</span>
+            </span>
           </div>
+          <div className="hidden md:block w-px h-6" style={{ background: 'rgba(148,163,184,.2)' }} />
+          <input
+            className="bx-title hidden md:block"
+            value={resumeTitle}
+            onChange={(e) => setResumeTitle(e.target.value)}
+            placeholder="Untitled Resume"
+            title="Resume title (used when saving)"
+          />
         </div>
-        
+
         {/* Workspace Layout Mode Toggles */}
-        <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 gap-0.5 shadow-sm">
+        <div className="hidden sm:flex p-1 rounded-xl gap-0.5"
+          style={{ background: 'rgba(148,163,184,.08)', border: '1px solid rgba(148,163,184,.16)' }}>
           {[
-            { id: 'split', label: 'Split Screen', icon: (
+            { id: 'split', label: 'Split', icon: (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
                 <rect x="3" y="3" width="18" height="18" rx="2" />
                 <path d="M12 3v18" />
               </svg>
             )},
-            { id: 'editor', label: 'Editor Focus', icon: (
+            { id: 'editor', label: 'Editor', icon: (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                 <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4z" />
               </svg>
             )},
-            { id: 'preview', label: 'Preview Focus', icon: (
+            { id: 'preview', label: 'Preview', icon: (
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="w-3.5 h-3.5">
                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                 <circle cx="12" cy="12" r="3" />
@@ -293,37 +418,57 @@ export default function Builder() {
             )}
           ].map(m => (
             <button key={m.id} onClick={() => setLayoutMode(m.id)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${layoutMode === m.id ? 'bg-white text-indigo-600 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all"
+              style={layoutMode === m.id
+                ? { background: 'rgba(99,102,241,.25)', color: '#c7d2fe' }
+                : { color: '#8b98ad' }}
             >
               {m.icon}
-              <span className="hidden md:inline">{m.label}</span>
+              <span className="hidden lg:inline">{m.label}</span>
             </button>
           ))}
         </div>
-        
-        <div className="flex items-center gap-4">
-          {isPro ? (
-            <span className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-full px-4 py-1.5 text-xs font-bold shadow-md shadow-indigo-600/10 flex items-center gap-1 animate-pulse">
-              💎 Premium Pro
-            </span>
-          ) : (
-            <button onClick={() => navigate('/pricing')} className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 rounded-full px-4 py-1.5 text-xs font-bold transition-all shadow-sm active:scale-95 flex items-center gap-1.5">
-              ⭐ Upgrade to Pro
-            </button>
-          )}
-          
-          <button onClick={handleDownloadPDF} className="bg-indigo-600 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/10 transition-all flex items-center gap-1.5">
+
+        <div className="flex items-center gap-2.5 flex-shrink-0">
+          {/* Save status */}
+          <span className="hidden md:inline text-[11px] font-semibold" style={{ color: saveError ? '#fca5a5' : '#64748b' }}>
+            {saving ? 'Saving…' : saveError ? saveError : savedAt ? `Saved ${savedAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}` : 'Not saved yet'}
+          </span>
+
+          <button onClick={handleSave} disabled={saving}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5 disabled:opacity-60"
+            style={{ background: '#4f46e5', color: '#fff', boxShadow: '0 4px 14px rgba(79,70,229,.35)' }}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M17 21v-8H7v8M7 3v5h8M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" />
+            </svg>
+            {saving ? 'Saving…' : 'Save'}
+          </button>
+
+          <button onClick={handleDownloadPDF}
+            className="px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1.5"
+            style={{ background: 'rgba(148,163,184,.1)', color: '#e6ebf4', border: '1px solid rgba(148,163,184,.22)' }}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3.5 h-3.5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
             </svg>
-            Download PDF
+            <span className="hidden sm:inline">PDF</span>
           </button>
-          
-          <span className="text-xs text-slate-500 font-semibold bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 flex items-center gap-1.5">
-            Hi, <span className="text-slate-800 font-bold">{user.name || 'User'}</span> 👋
-          </span>
-          
-          <button onClick={handleLogout} className="text-xs text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-xl transition-all font-bold">
+
+          {isPro ? (
+            <span className="hidden sm:flex rounded-full px-3 py-1.5 text-[11px] font-bold items-center gap-1"
+              style={{ background: 'rgba(245,158,11,.15)', color: '#fbbf24', border: '1px solid rgba(245,158,11,.25)' }}>
+              ✦ Pro
+            </span>
+          ) : (
+            <button onClick={() => navigate('/pricing')}
+              className="hidden sm:flex rounded-full px-3.5 py-1.5 text-[11px] font-bold transition-all active:scale-95 items-center gap-1"
+              style={{ background: 'rgba(245,158,11,.12)', color: '#fbbf24', border: '1px solid rgba(245,158,11,.3)' }}>
+              ⭐ Upgrade
+            </button>
+          )}
+
+          <button onClick={handleLogout}
+            className="hidden lg:block text-[11px] font-bold px-2.5 py-1.5 rounded-lg transition-all"
+            style={{ color: '#fca5a5' }}>
             Logout
           </button>
         </div>
