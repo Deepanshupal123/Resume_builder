@@ -55,57 +55,74 @@ export default function Pricing() {
     });
   };
 
-  const handlePayment = async () => {
-    const fresh = JSON.parse(localStorage.getItem('user') || '{}');
-    const u = fresh;
+  const applyPro = (subscriptionEndValue, u) => {
+    const updated = { ...u, isPro: true };
+    localStorage.setItem('user', JSON.stringify(updated));
+    setUser(updated);
+    setIsPro(true);
+    setSubscriptionEnd(subscriptionEndValue);
+    alert('Pro plan activated! You can now use all templates.');
+  };
 
+  const handlePayment = async () => {
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
     if (!u || !u._id) {
       alert('Please login first!');
+      navigate('/login', { state: { from: '/pricing' } });
+      return;
+    }
+    if (!localStorage.getItem('token')) {
+      alert('Please log in again to upgrade.');
       navigate('/login', { state: { from: '/pricing' } });
       return;
     }
 
     setLoading(true);
     try {
+      const ok = await loadRazorpayScript();
+      if (!ok || !window.Razorpay) throw new Error('Unable to load Razorpay');
+
       const orderRes = await fetch(`${API_BASE}/api/subscription/upgrade`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({ planType: 'pro' })
       });
       const orderData = await orderRes.json();
-      if (orderData.error) throw new Error(orderData.error);
+      if (!orderRes.ok || !orderData.orderId) {
+        throw new Error(orderData.message || 'Unable to start payment');
+      }
 
-      const ok = await loadRazorpayScript();
-      if (!ok || !window.Razorpay) throw new Error('Unable to load payment SDK');
+      const keyId = orderData.keyId || process.env.REACT_APP_RAZORPAY_KEY_ID;
+      if (!keyId) throw new Error('Razorpay key missing');
 
       const options = {
-        key: orderData.keyId,
+        key: keyId,
         amount: orderData.amount,
-        currency: orderData.currency,
+        currency: orderData.currency || 'INR',
         name: 'ResumeAI Pro',
-        description: 'Monthly Subscription - ₹10/month',
+        description: 'Monthly Subscription — ₹199/month',
         order_id: orderData.orderId,
         handler: async (response) => {
-          const verifyRes = await fetch(`${API_BASE}/api/subscription/verify`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-            })
-          });
-          const verifyData = await verifyRes.json();
+          try {
+            const verifyRes = await fetch(`${API_BASE}/api/subscription/verify`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              })
+            });
+            const verifyData = await verifyRes.json();
             if (verifyData.success) {
-            const updated = { ...u, isPro: true };
-            localStorage.setItem('user', JSON.stringify(updated));
-            setUser(updated);
-            setIsPro(true);
-            setSubscriptionEnd(verifyData.subscriptionEnd);
-            alert('🎉 Pro plan activated! You can now use all templates!');
-          } else {
-            alert('Payment verification failed. Please contact support.');
+              applyPro(verifyData.subscriptionEnd, u);
+            } else {
+              alert(verifyData.message || 'Payment verification failed.');
+            }
+          } catch {
+            alert('Payment completed but verification failed.');
           }
+          setLoading(false);
         },
         prefill: {
           name: u.name || '',
@@ -116,11 +133,15 @@ export default function Pricing() {
       };
 
       const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (resp) => {
+        alert(resp?.error?.description || 'Payment failed');
+        setLoading(false);
+      });
       rzp.open();
     } catch (err) {
-      alert('Error: ' + err.message);
+      alert(err.message);
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const FREE_FEATURES = [
@@ -230,7 +251,7 @@ export default function Pricing() {
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Pro</div>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-                <span style={{ fontSize: 42, fontWeight: 800, color: 'white' }}>₹10</span>
+                <span style={{ fontSize: 42, fontWeight: 800, color: 'white' }}>₹199</span>
                  <span style={{ fontSize: 16, color: 'rgba(255,255,255,0.8)' }}>/month</span>
               </div>
               <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.75)', margin: '8px 0 0' }}>Unlock everything</p>
@@ -262,7 +283,7 @@ export default function Pricing() {
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
                 }}
               >
-                {loading ? '⏳ Processing...' : '🚀 Upgrade to Pro — ₹199/mo'}
+                {loading ? 'Opening Razorpay…' : '🚀 Upgrade to Pro — ₹199/mo'}
               </button>
             )}
           </div>

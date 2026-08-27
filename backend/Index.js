@@ -1,20 +1,31 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const mongoose = require('mongoose');
-require('dotenv').config();
+require('dotenv').config({ path: path.join(__dirname, '.env'), override: true });
 
 const app = express();
 app.set('trust proxy', 1);
 
 const frontendOrigin = process.env.FRONTEND_URL || 'http://localhost:3000';
+const allowedOrigins = new Set([
+  frontendOrigin,
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://localhost:3002',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:3001',
+  'http://127.0.0.1:3002',
+  'https://resume-builder-silk-five.vercel.app',
+]);
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || [frontendOrigin, 'https://resume-builder-silk-five.vercel.app'].includes(origin)) {
+    if (!origin || allowedOrigins.has(origin)) {
       return callback(null, true);
     }
-    return callback(new Error('Not allowed by CORS'));
+    return callback(null, false);
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
